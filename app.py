@@ -5,109 +5,122 @@ st.set_page_config(layout="wide")
 
 # ---------------- ESTADO ----------------
 if "saldo" not in st.session_state:
-    st.session_state.saldo = 1000.00
+    st.session_state.saldo = 5000.00
 
-# ---------------- ESTILOS ----------------
+# ---------------- ESTILOS CSS PERSONALIZADOS ----------------
 st.markdown("""
 <style>
-/* Fondo y contenedor */
-.block-container {
-    padding-top: 1rem;
+/* Fondo oscuro general */
+.stApp {
     background-color: #0f172a;
 }
 
-/* Caja de Saldo Compacta */
-.balance-container {
+/* Quitar espacios de Streamlit */
+.block-container {
+    padding-top: 0rem;
+    padding-bottom: 0rem;
+}
+
+/* Contenedor del Saldo (pequeño y elegante) */
+.balance-box {
     background-color: #1e293b;
-    color: #f8fafc;
-    padding: 5px 12px;
-    border-radius: 8px;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 6px;
     font-size: 14px;
+    font-weight: 600;
     border: 1px solid #334155;
-    font-weight: bold;
     display: flex;
     align-items: center;
-    justify-content: center;
-    height: 38px;
-    min-width: 80px;
+    height: 35px;
+    margin-right: 10px;
 }
 
-/* Ajuste de botones para que sean uniformes */
+/* Estilo del Header */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0px;
+}
+
+/* Ajuste de botones nativos */
 .stButton>button {
-    height: 38px;
-    border-radius: 8px;
+    height: 35px;
+    border-radius: 6px;
     font-weight: bold;
+    padding: 0px 15px;
 }
 
-/* Quitar padding innecesario de las columnas */
-[data-testid="column"] {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
+/* Botón de JUGAR verde */
+.stButton>button[kind="primary"] {
+    background-color: #72af24;
+    border: none;
+    color: white;
+    width: 100px;
 }
+
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- HEADER ----------------
-# Dividimos en 2 grandes bloques: Logo (izquierda) y Controles (derecha)
-col_logo, col_controles = st.columns([1, 1])
+# ---------------- HEADER (LOGOTIPO + CONTROLES) ----------------
+# Usamos columnas con proporciones para empujar el saldo a la derecha
+col_logo, col_vacio, col_derecha = st.columns([1, 2, 2])
 
 with col_logo:
     try:
-        # Alineamos el logo a la izquierda
         logo = Image.open("Logo.jpg")
-        st.image(logo, width=170)
+        st.image(logo, width=150)
     except:
-        st.header("FORTUNA MX")
+        st.markdown("<h3 style='color:white; margin:0;'>FORTUNA MX</h3>", unsafe_allow_html=True)
 
-with col_controles:
-    # Sub-columnas muy ajustadas para mover todo a la derecha
-    # c1: Depósito, c2: Saldo, c3: Menú Persona
-    c1, c2, c3 = st.columns([0.4, 0.3, 0.15])
+with col_derecha:
+    # Sub-columnas para alinear saldo y botones en la esquina superior derecha
+    c1, c2, c3 = st.columns([1, 0.8, 0.2])
     
     with c1:
+        # Botón de depósito optimizado
         if st.button("💳 Depositar", use_container_width=True):
             st.session_state.saldo += 500
             st.rerun()
             
     with c2:
-        # Contenedor de saldo reducido
-        st.markdown(f"<div class='balance-container'>${st.session_state.saldo:,.2f}</div>", unsafe_allow_html=True)
+        # Saldo reducido pegado al icono de usuario
+        st.markdown(f"<div class='balance-box'>${st.session_state.saldo:,.2f}</div>", unsafe_allow_html=True)
         
     with c3:
-        # El botón de persona ahora dispara el menú en la barra lateral
-        if st.button("👤", use_container_width=True):
-            st.session_state.show_menu = True
+        # Botón de Persona que activa el Sidebar
+        if st.button("👤"):
+            pass # Streamlit abre el sidebar por defecto si hay contenido
 
-# ---------------- MENÚ DESPLEGABLE (Sidebar) ----------------
-# Usamos el Sidebar para un menú limpio y profesional
+# ---------------- MENÚ LATERAL (RETIROS, DEPÓSITOS, ETC.) ----------------
 with st.sidebar:
-    st.title("Mi Cuenta")
+    st.markdown("### 👤 Mi Cuenta")
+    st.write(f"**Saldo disponible:** ${st.session_state.saldo:,.2f}")
     st.markdown("---")
     if st.button("💸 Retiros", use_container_width=True):
-        st.info("Sección de Retiros")
+        st.write("Cargando sección de retiros...")
     if st.button("💳 Depósitos", use_container_width=True):
-        st.info("Sección de Depósitos")
+        st.write("Cargando sección de depósitos...")
     if st.button("💬 Mensajes", use_container_width=True):
-        st.info("Tienes 0 mensajes nuevos")
+        st.write("No tienes mensajes nuevos.")
     st.markdown("---")
     if st.button("🚪 Cerrar Sesión", use_container_width=True):
-        st.warning("Cerrando sesión...")
+        st.warning("Sesión cerrada.")
 
-# ---------------- BANNER ----------------
-st.image("https://images.unsplash.com/photo-1601597111158-2fceff292cdc", use_column_width=True)
+# ---------------- CONTENIDO PRINCIPAL ----------------
+st.markdown("## SIGUE JUGANDO")
 
-# ---------------- SECCIONES DE JUEGOS ----------------
-st.markdown("### 🎰 SIGUE JUGANDO")
-cols = st.columns(4)
-juegos = [("30 Spicy Fruits", "EGT"), ("40 Shining Crown", "EGT"), ("Leprechaun Hot", "PRAGMATIC"), ("Mega Slot", "FORTUNA")]
+# Representación del área de juego negra como en tu imagen
+st.markdown("""
+<div style="background-color: #000; width: 100%; height: 400px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid #334155;">
+    <span style="color: #334155; font-size: 50px;">?</span>
+</div>
+""", unsafe_allow_html=True)
 
-for i, (titulo, dev) in enumerate(juegos):
-    with cols[i]:
-        st.markdown(f"""
-        <div style='background:#1e293b; padding:15px; border-radius:12px; text-align:center; border:1px solid #334155;'>
-            <div style='font-weight:bold;'>{titulo}</div>
-            <div style='color:#94a3b8; font-size:10px;'>{dev}</div>
-        </div>
-        """, unsafe_allow_html=True)
-        st.button("Jugar", key=f"btn_{i}", use_container_width=True)
+# Botón JUGAR verde abajo a la izquierda
+st.write("")
+if st.button("JUGAR", type="primary"):
+    st.balloons()
+
+st.markdown("## WINPOT POPULAR")

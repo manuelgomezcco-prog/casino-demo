@@ -5,79 +5,89 @@ import os
 
 # 1. CONFIGURACIÓN DE LA PÁGINA
 st.set_page_config(
-    page_title="Fortuna MX - Elite Gaming",
+    page_title="Fortuna MX - Elite",
     page_icon="🍀",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
-# 2. CSS DE ALTA PRECISIÓN PARA LOGO Y REJILLA MÓVIL
+# 2. CSS PARA DISEÑO TIPO WINPOT (MODERNO Y COMPACTO)
 st.markdown("""
     <style>
-    .stApp { background-color: #0e1117; }
+    /* Fondo oscuro profundo */
+    .stApp { background-color: #0b0e11; }
+    header {visibility: hidden;}
     
-    /* LOGOTIPO: Forzamos tamaño original y alineación */
-    [data-testid="stImage"] img {
-        max-width: none !important;
-        width: 180px !important; /* Ajustado para que luzca imponente */
-    }
-
-    /* TÍTULO PRINCIPAL */
-    .gold-title {
-        color: #D4AF37;
-        text-align: center;
-        font-family: 'Helvetica', sans-serif;
-        font-weight: bold;
-        font-size: 30px;
-        margin-top: 10px;
-    }
-
-    /* SECCIÓN DE USUARIO COMPACTA */
-    .user-section {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 5px;
-    }
-    
-    .user-bar-mini {
-        background-color: #1f2630;
-        padding: 4px 10px;
-        border-radius: 12px;
+    /* ENCABEZADO TIPO APP BAR */
+    .top-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background-color: #1a1f26;
         display: flex;
         align-items: center;
-        border: 1px solid #D4AF37;
+        justify-content: space-between;
+        padding: 0 15px;
+        z-index: 999;
+        border-bottom: 1px solid #2d343f;
     }
     
-    .user-balance-mini {
-        color: #D4AF37;
-        font-weight: bold;
-        font-size: 13px;
-        margin-right: 5px;
+    /* LOGO POSICIONADO A LA IZQUIERDA */
+    .logo-img {
+        height: 40px !important;
+        width: auto !important;
     }
 
-    /* --- SOLUCIÓN PARA 3 COLUMNAS EN MÓVIL --- */
-    /* Forzamos al contenedor horizontal a no saltar de línea */
+    /* CONTENEDOR DE ACCIONES (DEPÓSITO Y SALDO) */
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .balance-tag {
+        background-color: #2d343f;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 14px;
+        border: 1px solid #3e4652;
+    }
+
+    /* REJILLA DE JUEGOS (ESTILO WINPOT) */
     div[data-testid="stHorizontalBlock"] {
         display: flex !important;
         flex-direction: row !important;
-        flex-wrap: nowrap !important; 
-        overflow-x: auto; /* Permite scroll si fuera necesario */
+        flex-wrap: nowrap !important;
+        gap: 8px !important;
+        overflow-x: auto;
     }
 
-    /* Cada columna ocupará exactamente el 33% */
     div[data-testid="column"] {
-        width: 33% !important;
-        flex: 1 1 33% !important;
-        min-width: 33% !important;
+        width: 24% !important; /* 4 juegos por fila */
+        flex: 1 1 24% !important;
+        min-width: 85px !important;
     }
 
-    /* Ajuste de botones JUGAR para que no se deformen */
-    div.stButton > button {
-        width: 100% !important;
-        font-size: 10px !important;
-        padding: 2px !important;
-        background-color: #D4AF37;
-        color: black;
+    /* TARJETAS DE JUEGO */
+    .game-card img {
+        border-radius: 12px;
+        border: 2px solid #2d343f;
+        transition: transform 0.2s;
+    }
+    .game-card img:hover { transform: scale(1.05); }
+
+    /* BOTÓN DE DEPÓSITO VERDE WINPOT */
+    .stButton > button {
+        background-color: #76b82a !important;
+        color: white !important;
+        border: none !important;
+        font-weight: bold !important;
+        border-radius: 4px !important;
+        padding: 5px 15px !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -85,54 +95,49 @@ st.markdown("""
 # 3. ESTADO DE SESIÓN
 if 'saldo' not in st.session_state: st.session_state.saldo = 5000.0
 
-# --- DIÁLOGO DE PERFIL ---
-@st.dialog("Perfil")
-def mostrar_perfil():
-    st.write("### 👤 Mi Cuenta")
-    st.write(f"Saldo: ${st.session_state.saldo:,.2f} MXN")
-    if st.button("Cerrar Sesión", type="primary"):
-        st.session_state.clear()
-        st.rerun()
-
-# --- BARRA SUPERIOR (LOGO IZQUIERDA | PERFIL DERECHA) ---
-col_logo, col_user = st.columns([1, 1])
-
-with col_logo:
-    if os.path.exists("logo.PNG"):
-        st.image("logo.PNG")
-
-with col_user:
-    st.markdown('<div class="user-section">', unsafe_allow_html=True)
-    if st.button("Mi Perfil", key="btn_p"):
-        mostrar_perfil()
-    st.markdown(f"""
-        <div class="user-bar-mini">
-            <span class="user-balance-mini">${st.session_state.saldo:,.2f}</span>
-            <span style="font-size: 14px;">👤</span>
+# --- COMPONENTE DE ENCABEZADO ---
+st.markdown(f"""
+    <div class="top-bar">
+        <div style="display:flex; align-items:center;">
+            <img src="https://raw.githubusercontent.com/{os.getenv('GITHUB_REPOSITORY', 'ManuelG-Prog/casino-demo')}/principal/logo.PNG" class="logo-img">
         </div>
-    """, unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+        <div class="header-actions">
+            <div class="balance-tag">${st.session_state.saldo:,.2f}</div>
+            <div style="font-size:22px;">👤</div>
+        </div>
+    </div>
+    <div style="margin-top: 80px;"></div>
+""", unsafe_allow_html=True)
 
-st.markdown("<h1 class='gold-title'>FORTUNA MX</h1>", unsafe_allow_html=True)
-st.divider()
+# --- BANNER PROMOCIONAL ---
+st.image("https://images.unsplash.com/photo-1518623489648-a173ef7824f3?w=1200", use_container_width=True)
+st.markdown("<h4 style='color:white; margin: 15px 0 5px 0;'>SIGUE JUGANDO</h4>", unsafe_allow_html=True)
 
-# --- LOBBY CON REJILLA FORZADA ---
-st.subheader("🔥 Destacados")
-
+# --- REJILLA DE JUEGOS (ESTILO WINPOT POPULAR) ---
 juegos = [
-    {"n": "Fruity Fortune", "img": "https://images.unsplash.com/photo-1596711762462-850f28584813?w=400"},
-    {"n": "Ancient Zeus", "img": "https://images.unsplash.com/photo-1503197979108-c824168d51a8?w=400"},
-    {"n": "Royal Roulette", "img": "https://images.unsplash.com/photo-1606167668584-78701c57f13d?w=400"}
+    {"n": "Spicy Fruits", "img": "https://images.unsplash.com/photo-1596711762462-850f28584813?w=300"},
+    {"n": "Shining Crown", "img": "https://images.unsplash.com/photo-1503197979108-c824168d51a8?w=300"},
+    {"n": "Leprechaun", "img": "https://images.unsplash.com/photo-1606167668584-78701c57f13d?w=300"},
+    {"n": "Voltage Rapid", "img": "https://images.unsplash.com/photo-1511193311914-0346f16efe90?w=300"}
 ]
 
-# Filas de 3 juegos
-cols = st.columns(3)
-for i in range(3):
-    juego = juegos[i]
+# Primera Fila (Sigue Jugando)
+cols = st.columns(len(juegos))
+for i, juego in enumerate(juegos):
     with cols[i]:
+        st.markdown('<div class="game-card">', unsafe_allow_html=True)
         st.image(juego["img"], use_container_width=True)
-        st.markdown(f"<p style='text-align:center; font-size:9px; font-weight:bold;'>{juego['n']}</p>", unsafe_allow_html=True)
-        if st.button("JUGAR", key=f"play_{i}"):
+        if st.button("JUGAR", key=f"j_{i}"):
             if st.session_state.saldo >= 50:
                 st.session_state.saldo -= 50
                 st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+st.markdown("<h4 style='color:white; margin: 20px 0 5px 0;'>WINPOT POPULAR</h4>", unsafe_allow_html=True)
+
+# Segunda Fila (Popular)
+cols2 = st.columns(len(juegos))
+for i, juego in enumerate(juegos):
+    with cols2[i]:
+        st.image(juego["img"], use_container_width=True)
+        st.button("INFO", key=f"inf_{i}")

@@ -12,36 +12,38 @@ st.set_page_config(
 # 2. ESTILOS CSS PARA UNA INTERFAZ "PREMIUM"
 st.markdown("""
     <style>
-    /* Fondo general oscuro */
     .stApp {
         background-color: #0e1117;
-    }
-    /* Estilo para las tarjetas de juegos */
-    .game-card {
-        background-color: #1f2630;
-        border-radius: 15px;
-        padding: 10px;
-        border: 1px solid #D4AF37;
-        transition: transform .2s;
-    }
-    .game-card:hover {
-        transform: scale(1.02);
     }
     .gold-title {
         color: #D4AF37;
         text-align: center;
         font-family: 'Serif';
         font-weight: bold;
-        font-size: 42px;
-        margin-bottom: 0px;
+        font-size: 36px;
+        margin-top: -20px;
     }
     .balance-box {
         background-color: #D4AF37;
         color: black;
-        padding: 10px;
-        border-radius: 10px;
+        padding: 15px;
+        border-radius: 12px;
         text-align: center;
         font-weight: bold;
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+    div.stButton > button {
+        background-color: #D4AF37;
+        color: black;
+        font-weight: bold;
+        border-radius: 8px;
+        border: none;
+        width: 100%;
+    }
+    div.stButton > button:hover {
+        background-color: #B8860B;
+        color: white;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -54,73 +56,85 @@ if 'ggr' not in st.session_state:
 if 'logs' not in st.session_state:
     st.session_state.logs = []
 
-# --- NAVEGACIÓN ---
+# --- NAVEGACIÓN LATERAL ---
 st.sidebar.markdown("<h2 style='color: #D4AF37;'>♣️ FORTUNA MX</h2>", unsafe_allow_html=True)
-pagina = st.sidebar.radio("Navegación", ["🎰 Lobby de Juegos", "💰 Cajero / Depósitos", "📊 Admin Panel"])
+pagina = st.sidebar.radio("Menú Principal", ["🎰 Lobby de Juegos", "💰 Cajero / Depósitos", "📊 Admin Panel"])
 
 # --- LÓGICA DEL LOBBY ---
 if pagina == "🎰 Lobby de Juegos":
-    # Header centrado
+    # Header con Logo y Título
     col_a, col_b, col_c = st.columns([1, 2, 1])
     with col_b:
-        st.image("https://r.jina.ai/i/9e0e5a8f6d3c4b2a8e1d2f3a4b5c6d7e", use_container_width=True)
+        # Logo del Trébol Dorado (URL de respaldo estable)
+        st.image("https://i.ibb.co/3WfK9F1/fortuna-mx-logo.png", use_container_width=True)
         st.markdown("<h1 class='gold-title'>FORTUNA MX</h1>", unsafe_allow_html=True)
     
     st.divider()
 
-    # Saldo en una posición fija
-    c_inf, c_sal = st.columns([4, 1])
-    with c_sal:
-        st.markdown(f"<div class='balance-box'>SALDO: ${st.session_state.saldo:,.2f} MXN</div>", unsafe_allow_html=True)
+    # Saldo destacado
+    st.markdown(f"<div class='balance-box'>TU SALDO: ${st.session_state.saldo:,.2f} MXN</div>", unsafe_allow_html=True)
 
     st.markdown("### 🔥 Juegos más populares")
     
-    # Definición de juegos con imágenes reales
+    # Definición de juegos con imágenes de alta calidad
     juegos = [
-        {"nombre": "Sweet Bonanza", "img": "https://images.ctfassets.net/69mcl89p8l6v/7d2fEof2C0y6yOQUy6e2Yy/719f9f592d3e4f0d8a5a5a5a5a5a5a5a/sweet-bonanza.jpg", "prov": "Pragmatic"},
-        {"nombre": "Gates of Olympus", "img": "https://images.ctfassets.net/69mcl89p8l6v/5P6p7o8n9m0l1k2j3i4h5g/9a8b7c6d5e4f3g2h1i0j9k8l7m6n5o4p/gates-of-olympus.jpg", "prov": "Pragmatic"},
-        {"nombre": "Lightning Roulette", "img": "https://www.evolution.com/sites/default/files/styles/game_thumbnail/public/game-thumbnails/lightning-roulette.jpg", "prov": "Evolution"},
-        {"nombre": "Blackjack Live", "img": "https://www.evolution.com/sites/default/files/styles/game_thumbnail/public/game-thumbnails/blackjack.jpg", "prov": "Evolution"}
+        {"nombre": "Sweet Bonanza", "img": "https://img.freepik.com/premium-photo/colorful-candies-sweets-background_800531-152.jpg", "prov": "Pragmatic"},
+        {"nombre": "Gates of Olympus", "img": "https://img.freepik.com/premium-photo/zeus-god-thunder-generative-ai_170984-1144.jpg", "prov": "Pragmatic"},
+        {"nombre": "Lightning Roulette", "img": "https://img.freepik.com/free-photo/casino-roulette-wheel-with-chips-poker-cards-dark-background_155003-14545.jpg", "prov": "Evolution"},
+        {"nombre": "Blackjack VIP", "img": "https://img.freepik.com/free-photo/poker-chips-cards-green-table_155003-14540.jpg", "prov": "Evolution"}
     ]
 
-    # Grid de juegos en columnas
+    # Grid de juegos
     cols = st.columns(2)
     for idx, juego in enumerate(juegos):
         with cols[idx % 2]:
-            with st.container():
-                # Simulación de tarjeta visual
-                st.image(juego["img"], use_container_width=True, caption=f"By {juego['prov']}")
+            with st.container(border=True):
+                st.image(juego["img"], use_container_width=True)
                 st.write(f"**{juego['nombre']}**")
-                if st.button(f"JUGAR AHORA", key=f"play_{idx}", use_container_width=True):
+                st.caption(f"Proveedor: {juego['prov']}")
+                if st.button(f"APOSTAR $50", key=f"play_{idx}"):
                     if st.session_state.saldo >= 50:
                         st.session_state.saldo -= 50
-                        st.session_state.ggr += 5.0
-                        st.session_state.logs.insert(0, {"Hora": time.strftime("%H:%M:%S"), "Evento": f"Jugó {juego['nombre']}", "Monto": "-$50.00"})
-                        st.balloons()
-                        st.toast(f"Abriendo {juego['nombre']}...")
-                        time.sleep(1)
+                        st.session_state.ggr += 7.50 # Margen de casa
+                        st.session_state.logs.insert(0, {"Hora": time.strftime("%H:%M:%S"), "Juego": juego['nombre'], "Monto": "-$50.00"})
+                        st.toast(f"¡Suerte en {juego['nombre']}!")
+                        time.sleep(0.4)
                         st.rerun()
                     else:
-                        st.error("❌ Saldo insuficiente")
+                        st.error("Saldo insuficiente")
 
-# --- CAJERO (Nuevo) ---
+# --- CAJERO ---
 elif pagina == "💰 Cajero / Depósitos":
     st.markdown("<h2 class='gold-title'>CAJERO</h2>", unsafe_allow_html=True)
-    st.write("Recarga tu cuenta para seguir jugando.")
     
-    monto_recarga = st.number_input("Monto a depositar (MXN)", min_value=100, step=100)
-    metodo = st.selectbox("Método de Pago", ["SPEI (Transferencia)", "OXXO Pay", "Tarjeta Bancaria"])
-    
-    if st.button("PROCESAR DEPÓSITO", use_container_width=True):
-        with st.spinner("Conectando con pasarela de pago..."):
-            time.sleep(2)
-            st.session_state.saldo += monto_recarga
-            st.success(f"¡Depósito de ${monto_recarga} MXN exitoso!")
-            st.rerun()
+    with st.container(border=True):
+        monto = st.number_input("Monto a depositar (MXN)", min_value=100, step=500, value=1000)
+        metodo = st.selectbox("Selecciona tu método", ["SPEI", "Tarjeta Débito/Crédito", "OXXO Pay"])
+        
+        if st.button("CONFIRMAR DEPÓSITO"):
+            with st.spinner("Procesando pago seguro..."):
+                time.sleep(1.5)
+                st.session_state.saldo += monto
+                st.success(f"¡Has depositado ${monto:,.2f} con éxito!")
+                st.balloons()
+                time.sleep(1)
+                st.rerun()
 
 # --- ADMIN PANEL ---
 else:
-    st.title("📊 Control Administrativo")
-    st.metric("GGR Acumulado (Revenue)", f"${st.session_state.ggr:,.2f} MXN")
+    st.title("📊 Panel Administrativo - Fortuna MX")
+    
+    m1, m2 = st.columns(2)
+    m1.metric("GGR Acumulado", f"${st.session_state.ggr:,.2f} MXN")
+    m2.metric("Usuarios Conectados", "1")
+    
+    st.divider()
     st.write("### Historial de Movimientos")
-    st.dataframe(pd.DataFrame(st.session_state.logs), use_container_width=True)
+    if st.session_state.logs:
+        st.table(pd.DataFrame(st.session_state.logs))
+    else:
+        st.info("No hay transacciones registradas.")
+
+# --- FOOTER ---
+st.sidebar.divider()
+st.sidebar.caption("Fortuna MX © 2026 | Desarrollo Seguro")

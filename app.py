@@ -10,42 +10,28 @@ st.set_page_config(
     layout="wide"
 )
 
-# 2. ESTILOS CSS PERSONALIZADOS
+# 2. ESTILOS CSS (DISEÑO PREMIUM)
 st.markdown("""
     <style>
-    .stApp {
-        background-color: #0e1117;
-    }
+    .stApp { background-color: #0e1117; }
     .gold-title {
         color: #D4AF37;
         text-align: center;
         font-family: 'Helvetica', sans-serif;
         font-weight: bold;
-        font-size: 32px;
+        font-size: 30px;
         margin-top: -10px;
-        letter-spacing: 2px;
     }
-    /* Estilo para la barra superior de usuario */
     .user-bar {
         background-color: #1f2630;
-        padding: 10px 20px;
+        padding: 8px 15px;
         border-radius: 50px;
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: space-between;
         border: 1px solid #D4AF37;
-        margin-bottom: 10px;
     }
-    .user-balance {
-        color: #D4AF37;
-        font-weight: bold;
-        font-size: 18px;
-        margin-right: 15px;
-    }
-    .user-icon {
-        font-size: 24px;
-        color: white;
-    }
+    .user-balance { color: #D4AF37; font-weight: bold; font-size: 16px; }
     /* Botones de apuesta */
     div.stButton > button {
         background-color: #D4AF37;
@@ -53,53 +39,70 @@ st.markdown("""
         font-weight: bold;
         border-radius: 8px;
         border: none;
-        padding: 8px;
-        width: 100%;
-        font-size: 12px;
-    }
-    div.stButton > button:hover {
-        background-color: #ffffff;
-        color: black;
     }
     </style>
     """, unsafe_allow_html=True)
 
 # 3. ESTADO DE SESIÓN
-if 'saldo' not in st.session_state:
-    st.session_state.saldo = 5000.0
-if 'ggr' not in st.session_state:
-    st.session_state.ggr = 0.0
-if 'logs' not in st.session_state:
-    st.session_state.logs = []
+if 'saldo' not in st.session_state: st.session_state.saldo = 5000.0
+if 'ggr' not in st.session_state: st.session_state.ggr = 0.0
+if 'logs' not in st.session_state: st.session_state.logs = []
+if 'mensajes' not in st.session_state: 
+    st.session_state.mensajes = ["¡Bienvenido a Fortuna MX!", "Tu bono de bienvenida ha sido activado."]
+
+# --- FUNCIÓN PARA EL PERFIL ---
+@st.dialog("Mi Perfil - Fortuna MX")
+def mostrar_perfil():
+    st.write(f"### 👤 Usuario: Manuel Gómez")
+    st.write(f"**Saldo actual:** ${st.session_state.saldo:,.2f} MXN")
+    
+    tab1, tab2, tab3 = st.tabs(["💬 Mensajes", "📜 Movimientos", "⚙️ Cuenta"])
+    
+    with tab1:
+        for msg in st.session_state.mensajes:
+            st.info(msg)
+            
+    with tab2:
+        if st.session_state.logs:
+            df = pd.DataFrame(st.session_state.logs)
+            st.dataframe(df, use_container_width=True)
+        else:
+            st.write("No hay movimientos recientes.")
+            
+    with tab3:
+        if st.button("Cerrar Sesión", type="primary", use_container_width=True):
+            st.session_state.clear()
+            st.rerun()
 
 # --- NAVEGACIÓN ---
-menu = st.sidebar.radio("Navegación:", ["🎰 Lobby", "💰 Cajero", "📊 Admin"])
+menu = st.sidebar.radio("Menú:", ["🎰 Lobby", "💰 Cajero", "📊 Admin"])
 
-# --- ENCABEZADO SUPERIOR (Logo, Título y Perfil/Saldo) ---
-# Creamos 3 columnas: [Logo][Título][Saldo/Perfil]
-head_left, head_mid, head_right = st.columns([1, 2, 1])
+# --- BARRA SUPERIOR ---
+head_left, head_mid, head_right = st.columns([1, 2, 1.2])
 
 with head_left:
     if os.path.exists("logo.PNG"):
-        st.image("logo.PNG", width=80)
+        st.image("logo.PNG", width=70)
 
 with head_mid:
     st.markdown("<h1 class='gold-title'>FORTUNA MX</h1>", unsafe_allow_html=True)
 
 with head_right:
-    # Contenedor para el saldo y el icono de persona
+    # Creamos el contenedor visual y el botón que activa el diálogo
     st.markdown(f"""
         <div class="user-bar">
             <span class="user-balance">${st.session_state.saldo:,.2f}</span>
-            <span class="user-icon">👤</span>
+            <span style="color:white;">👤</span>
         </div>
     """, unsafe_allow_html=True)
+    if st.button("Ver Mi Perfil", use_container_width=True):
+        mostrar_perfil()
 
 st.divider()
 
-# --- LOBBY DE JUEGOS ---
+# --- LOBBY DE JUEGOS (3 POR FILA) ---
 if menu == "🎰 Lobby":
-    st.subheader("🔥 Juegos Destacados")
+    st.subheader("🔥 Juegos en Vivo")
     
     juegos = [
         {"n": "Fruity Fortune", "img": "https://images.unsplash.com/photo-1596711762462-850f28584813?w=600"},
@@ -110,7 +113,6 @@ if menu == "🎰 Lobby":
         {"n": "Poker Night", "img": "https://images.unsplash.com/photo-1511193311914-0346f16efe90?w=600"}
     ]
 
-    # Distribución de 3 juegos por fila
     for i in range(0, len(juegos), 3):
         cols = st.columns(3)
         for j in range(3):
@@ -119,26 +121,25 @@ if menu == "🎰 Lobby":
                 with cols[j]:
                     with st.container(border=True):
                         st.image(juego["img"], use_container_width=True)
-                        st.markdown(f"<p style='text-align:center; font-weight:bold; color:white; font-size:14px; margin-bottom:5px;'>{juego['n']}</p>", unsafe_allow_html=True)
+                        st.markdown(f"<p style='text-align:center; font-size:12px; font-weight:bold;'>{juego['n']}</p>", unsafe_allow_html=True)
                         if st.button(f"APOSTAR", key=f"btn_{i+j}"):
                             if st.session_state.saldo >= 50:
                                 st.session_state.saldo -= 50
                                 st.session_state.ggr += 12.50
-                                st.session_state.logs.insert(0, {"Hora": time.strftime("%H:%M:%S"), "Juego": juego['n'], "Acción": "-$50.00"})
+                                st.session_state.logs.insert(0, {"Hora": time.strftime("%H:%M"), "Juego": juego['n'], "Monto": "-50.00"})
                                 st.toast(f"¡Suerte en {juego['n']}!")
                                 time.sleep(0.3)
                                 st.rerun()
-                            else:
-                                st.error("Sin saldo")
 
 elif menu == "💰 Cajero":
-    st.markdown("<h2 class='gold-title'>CAJERO</h2>", unsafe_allow_html=True)
-    monto = st.select_slider("Monto a depositar:", options=[200, 500, 1000, 2000, 5000])
-    if st.button("RECARGAR AHORA"):
+    st.markdown("<h2 class='gold-title'>DEPÓSITO</h2>", unsafe_allow_html=True)
+    monto = st.select_slider("Selecciona monto:", options=[500, 1000, 2000, 5000])
+    if st.button("Confirmar Recarga"):
         st.session_state.saldo += monto
+        st.session_state.logs.insert(0, {"Hora": time.strftime("%H:%M"), "Juego": "Depósito", "Monto": f"+{monto}.00"})
         st.balloons()
         st.rerun()
 
 else:
-    st.title("📊 Panel Admin")
-    st.metric("GGR (Ganancia Casa)", f"${st.session_state.ggr:,.2f}")
+    st.title("📊 GGR House")
+    st.metric("Total Ganado Casa", f"${st.session_state.ggr:,.2f}")

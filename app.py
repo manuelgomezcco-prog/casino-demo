@@ -1,32 +1,24 @@
 import streamlit as st
-import base64
-import requests
 
 # 1. CONFIGURACIÓN DE LA PÁGINA
-st.set_page_config(page_title="Fortuna MX", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(
+    page_title="Fortuna MX",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
-# 2. FUNCIÓN PARA CARGAR LA IMAGEN (SOLUCIÓN AL LOGO ROTO)
-def get_base64(url):
-    try:
-        response = requests.get(url)
-        return base64.b64encode(response.content).decode()
-    except:
-        return ""
-
-# Cargamos el logo una sola vez
+# URL DEL LOGO (directo, sin base64)
 logo_url = "https://raw.githubusercontent.com/ManuelG-Prog/casino-demo/principal/logo.PNG"
-logo_data = get_base64(logo_url)
 
-# 3. CSS PROFESIONAL (ESTILO WINPOT)
+# 2. CSS + HEADER
 st.markdown(f"""
     <style>
-    /* Fondo y reseteo */
     .stApp {{ background-color: #0b1118; }}
     header {{visibility: hidden;}}
     [data-testid="stHeader"] {{display: none;}}
     div.block-container {{padding-top: 0rem;}}
 
-    /* HEADER FIJO */
+    /* HEADER */
     .custom-header {{
         display: flex;
         justify-content: space-between;
@@ -42,7 +34,6 @@ st.markdown(f"""
 
     .logo-img {{
         height: 38px;
-        width: auto;
     }}
 
     .header-right {{
@@ -51,7 +42,6 @@ st.markdown(f"""
         gap: 8px;
     }}
 
-    /* BOTÓN DEPOSITAR CORREGIDO */
     .btn-dep {{
         background-color: #76b82a;
         color: black !important;
@@ -71,12 +61,10 @@ st.markdown(f"""
         font-size: 13px;
     }}
 
-    /* Ajuste para que el contenido no quede oculto bajo el header */
     .main-body {{
         margin-top: 80px;
     }}
 
-    /* Grid de juegos */
     .game-title {{
         color: white;
         font-weight: bold;
@@ -85,7 +73,6 @@ st.markdown(f"""
         font-size: 14px;
     }}
 
-    /* Menú Inferior */
     .footer-nav {{
         position: fixed;
         bottom: 0; left: 0; right: 0;
@@ -98,36 +85,48 @@ st.markdown(f"""
     }}
     </style>
 
+    <!-- HEADER -->
     <div class="custom-header">
-        <img src="data:image/png;base64,{logo_data}" class="logo-img">
+        <img src="{logo_url}" class="logo-img">
         <div class="header-right">
             <a class="btn-dep">📥 Depositar</a>
             <div class="bal-badge">$ 5,000.00</div>
             <div style="font-size: 24px; color: #8a96a3;">👤</div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
-# 4. CONTENIDO DE LA APP
+# 3. CONTENIDO
 st.markdown('<div class="main-body">', unsafe_allow_html=True)
 
 # Banner
-st.image("https://images.unsplash.com/photo-1518623489648-a173ef7824f3?w=1200", use_container_width=True)
+st.image(
+    "https://images.unsplash.com/photo-1518623489648-a173ef7824f3?w=1200",
+    use_container_width=True
+)
 
-# Sección de Juegos
+# Juegos
 st.markdown('<div class="game-title">Sigue Jugando</div>', unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
+
 with col1:
-    st.image("https://images.unsplash.com/photo-1596711762462-850f28584813?w=400", use_container_width=True)
+    st.image(
+        "https://images.unsplash.com/photo-1596711762462-850f28584813?w=400",
+        use_container_width=True
+    )
     st.button("JUGAR", key="g1", use_container_width=True)
+
 with col2:
-    st.image("https://images.unsplash.com/photo-1596711762462-850f28584813?w=400", use_container_width=True)
+    st.image(
+        "https://images.unsplash.com/photo-1596711762462-850f28584813?w=400",
+        use_container_width=True
+    )
     st.button("JUGAR", key="g2", use_container_width=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# 5. NAVEGACIÓN INFERIOR
+# 4. FOOTER
 st.markdown("""
     <div class="footer-nav">
         <div style="text-align: center; color: white; font-size: 10px;">🏠<br>Inicio</div>
@@ -136,4 +135,4 @@ st.markdown("""
         <div style="text-align: center; color: white; font-size: 10px;">☰<br>Menú</div>
     </div>
     <div style="height: 70px;"></div>
-    """, unsafe_allow_html=True)
+""", unsafe_allow_html=True)

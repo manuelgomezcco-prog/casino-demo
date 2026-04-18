@@ -1,35 +1,19 @@
 import streamlit as st
 
-# -----------------------------
-# CONFIG
-# -----------------------------
-st.set_page_config(page_title="Fortuna MX", layout="wide")
+# ---------------- CONFIG ----------------
+st.set_page_config(layout="wide")
 
-# -----------------------------
-# ESTADO (SALDO)
-# -----------------------------
+# ---------------- ESTADO ----------------
 if "saldo" not in st.session_state:
     st.session_state.saldo = 1000
 
-# -----------------------------
-# FUNCIONES
-# -----------------------------
 def depositar():
     st.session_state.saldo += 100
 
-def jugar(costo):
-    if st.session_state.saldo >= costo:
-        st.session_state.saldo -= costo
-        st.success(f"Jugaste (-${costo})")
-    else:
-        st.error("Saldo insuficiente")
-
-# -----------------------------
-# CSS
-# -----------------------------
+# ---------------- CSS ----------------
 st.markdown("""
 <style>
-body {
+.stApp {
     background-color: #0b1118;
 }
 
@@ -45,32 +29,32 @@ body {
 
 /* LOGO */
 .logo {
-    height:60px;
+    height:50px;
 }
 
 /* DERECHA */
 .right {
     display:flex;
     align-items:center;
-    gap:10px;
+    gap:8px;
 }
 
 /* BOTÓN */
-.deposit {
+.btn {
     background:#76b82a;
     color:white;
-    padding:8px 14px;
-    border-radius:8px;
+    padding:6px 12px;
+    border-radius:6px;
+    font-size:12px;
     font-weight:bold;
-    font-size:13px;
 }
 
 /* SALDO */
 .balance {
     background:#2c3a4d;
-    padding:6px 12px;
-    border-radius:8px;
-    font-size:12px;
+    padding:6px 10px;
+    border-radius:6px;
+    font-size:11px;
     color:white;
 }
 
@@ -78,33 +62,19 @@ body {
 .user {
     background:#2c3a4d;
     padding:6px 10px;
-    border-radius:8px;
-    font-size:16px;
-}
-
-/* TARJETAS */
-.card {
-    background:#16202b;
-    padding:10px;
-    border-radius:12px;
-}
-
-/* TITULOS */
-.title {
-    font-size:22px;
-    font-weight:bold;
-    margin-top:20px;
+    border-radius:6px;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# -----------------------------
-# HEADER
-# -----------------------------
-col1, col2 = st.columns([3,2])
+# ---------------- HEADER ----------------
+col1, col2 = st.columns([6,4])
 
 with col1:
-    st.image("https://raw.githubusercontent.com/ManuelG-Prog/casino-demo/principal/Logo.jpg", width=140)
+    st.image(
+        "https://raw.githubusercontent.com/ManuelG-Prog/casino-demo/principal/Logo.jpg",
+        width=120
+    )
 
 with col2:
     c1, c2, c3 = st.columns([1,1,1])
@@ -115,9 +85,7 @@ with col2:
 
     with c2:
         st.markdown(f"""
-        <div class="balance">
-            ${st.session_state.saldo}
-        </div>
+        <div class="balance">${st.session_state.saldo}</div>
         """, unsafe_allow_html=True)
 
     with c3:
@@ -127,26 +95,29 @@ with col2:
             st.write("💬 Mensajes")
             st.write("🚪 Cerrar sesión")
 
-# -----------------------------
-# BANNER
-# -----------------------------
-st.image("https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=1200", use_container_width=True)
+# ---------------- BANNER ----------------
+st.image(
+    "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=1200",
+    use_container_width=True
+)
 
-# -----------------------------
-# CATEGORÍAS
-# -----------------------------
+# ---------------- CATEGORÍAS ----------------
 st.write("")
 c1, c2, c3, c4 = st.columns(4)
-
 c1.button("🔍 Buscar")
 c2.button("🏠 Hogar")
 c3.button("🆕 Nuevo")
 c4.button("🎰 Slots")
 
-# -----------------------------
-# JUEGOS
-# -----------------------------
-st.markdown('<div class="title">🎰 Sigue Jugando</div>', unsafe_allow_html=True)
+# ---------------- JUEGOS ----------------
+st.markdown("## 🎰 Sigue Jugando")
+
+def jugar(costo):
+    if st.session_state.saldo >= costo:
+        st.session_state.saldo -= costo
+        st.success(f"Jugaste (-${costo})")
+    else:
+        st.error("Saldo insuficiente")
 
 col1, col2, col3 = st.columns(3)
 

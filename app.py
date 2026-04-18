@@ -1,124 +1,80 @@
 import streamlit as st
-import pandas as pd
 
-# 1. CONFIGURACIÓN DE LA PÁGINA
-st.set_page_config(
-    page_title="Fortuna MX",
-    page_icon="🍀",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+# 1. CONFIGURACIÓN
+st.set_page_config(page_title="Fortuna MX", page_icon="🍀", layout="wide")
 
-# 2. CSS OPTIMIZADO
+# 2. CSS CORREGIDO
 st.markdown("""
     <style>
     .stApp { background-color: #0b0e11; }
     header {visibility: hidden;}
     
-    /* Contenedor del Header para alinear Logo y Saldo */
-    .header-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 5px 0px;
-        margin-bottom: 10px;
+    /* Contenedor especial para el Logo */
+    .logo-container img {
+        width: 180px !important; /* Ajusta este valor al tamaño que desees */
+        height: auto !important;
+        object-fit: contain !important;
+        border-radius: 0px !important; /* Quita el redondeo que aplicamos a los juegos */
     }
 
-    /* ESTILO ESPECÍFICO PARA LA CUADRÍCULA DE JUEGOS */
-    /* Usamos un selector que no afecte a las columnas del header */
-    [data-testid="stVerticalBlock"] > [data-testid="stHorizontalBlock"] {
-        gap: 6px !important;
+    /* Estilo para el Saldo */
+    .saldo-box {
+        background: #1a1f26;
+        color: #76b82a;
+        padding: 5px 12px;
+        border-radius: 5px;
+        font-weight: bold;
+        font-size: 16px;
+        border: 1px solid #2d343f;
+        display: inline-block;
     }
 
-    /* Solo aplicar el ancho del 19% a las columnas de la cuadrícula de juegos */
-    .grid-column [data-testid="column"] {
-        width: 19% !important;
-        flex: 1 1 19% !important;
-        min-width: 60px !important;
-    }
-
-    /* Ajuste de imágenes de juegos */
-    [data-testid="stImage"] img {
-        border-radius: 6px !important;
+    /* SOLO para las imágenes de los juegos */
+    .grid-item img {
+        border-radius: 8px !important;
         aspect-ratio: 1 / 1;
         object-fit: cover;
     }
     
-    /* Botón Jugar */
+    /* Botón Perfil (Icono) */
     .stButton > button {
-        background-color: #76b82a !important;
-        color: white !important;
-        font-size: 9px !important;
-        height: 22px !important;
-        width: 100%;
-        border-radius: 4px !important;
-        border: none !important;
-        text-transform: uppercase;
-        font-weight: bold;
-    }
-
-    .section-label {
-        color: #8a96a3;
-        font-size: 11px;
-        font-weight: bold;
-        margin: 15px 0 5px 0;
-        text-transform: uppercase;
+        border-radius: 6px !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 3. LÓGICA DE USUARIO
-if 'saldo' not in st.session_state: st.session_state.saldo = 5000.0
+# 3. HEADER (LOGO Y SALDO)
+# Usamos una estructura de columnas limpia
+c1, c2 = st.columns([1, 1])
 
-@st.dialog("Cuenta")
-def mostrar_perfil():
-    st.write(f"### 👤 Manuel Gómez")
-    st.divider()
-    st.button("💰 Depósitos", use_container_width=True)
-    st.button("💸 Retiros", use_container_width=True)
-    if st.button("🚪 Salir", type="primary", use_container_width=True):
-        st.session_state.clear()
-        st.rerun()
+with c1:
+    # Usamos HTML para forzar que el logo se vea correctamente y no use el estilo de los juegos
+    logo_url = "https://raw.githubusercontent.com/ManuelG-Prog/casino-demo/principal/logo.PNG"
+    st.markdown(f'<div class="logo-container"><img src="{logo_url}"></div>', unsafe_allow_html=True)
 
-# 4. HEADER (LOGO Y ÁREA DE SALDO)
-# Usamos columnas con proporciones para proteger el tamaño del logo
-head_left, head_right = st.columns([2, 1])
+with c2:
+    # Alineación manual a la derecha
+    st.markdown(f"""
+        <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; height: 60px;">
+            <div class="saldo-box">${5000:,.2f}</div>
+        </div>
+    """, unsafe_allow_html=True)
+    # El botón de perfil justo debajo o a un lado
+    col_vacia, col_btn = st.columns([4, 1])
+    with col_btn:
+        if st.button("👤", key="perfil"):
+            st.toast("Abriendo cuenta...")
 
-with head_left:
-    # El logo mantiene su tamaño original
-    st.image("https://raw.githubusercontent.com/ManuelG-Prog/casino-demo/principal/logo.PNG", width=120)
-
-with head_right:
-    # Saldo y Botón alineados a la derecha
-    col_s, col_p = st.columns([3, 1])
-    with col_s:
-        st.markdown(f"""
-            <div style="display: flex; justify-content: flex-end; align-items: center; height: 35px;">
-                <div style="background:#1a1f26; color:#76b82a; padding:5px 10px; border-radius:5px; font-weight:bold; font-size:14px; border:1px solid #2d343f;">
-                    ${st.session_state.saldo:,.2f}
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
-    with col_p:
-        if st.button("👤", key="btn_perfil"):
-            mostrar_perfil()
-
-# 5. CONTENIDO PRINCIPAL
+# 4. CONTENIDO
 st.image("https://images.unsplash.com/photo-1518623489648-a173ef7824f3?w=1200", use_container_width=True)
 
-def render_grid(titulo, n_items):
-    st.markdown(f"<div class='section-label'>{titulo}</div>", unsafe_allow_html=True)
-    img_placeholder = "https://images.unsplash.com/photo-1596711762462-850f28584813?w=150"
-    
-    # Creamos la cuadrícula
-    # Nota: Para móviles, 5 columnas pueden ser muy pequeñas, pero aquí forzamos la estructura
-    for fila in range(0, n_items, 5):
-        cols = st.columns(5)
-        for i in range(5):
-            if (fila + i) < n_items:
-                with cols[i]:
-                    st.image(img_placeholder, use_container_width=True)
-                    st.button("Jugar", key=f"p_{titulo}_{fila+i}")
+st.markdown("<div style='color:#8a96a3; font-size:12px; font-weight:bold; margin-top:20px;'>POPULARES</div>", unsafe_allow_html=True)
 
-render_grid("Populares", 10)
-render_grid("Nuevos Lanzamientos", 5)
+# Cuadrícula de juegos con clase específica para no romper el logo
+cols = st.columns(5)
+for i in range(5):
+    with cols[i]:
+        st.markdown('<div class="grid-item">', unsafe_allow_html=True)
+        st.image("https://images.unsplash.com/photo-1596711762462-850f28584813?w=150", use_container_width=True)
+        st.button("JUGAR", key=f"btn_{i}", use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)

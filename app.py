@@ -1,218 +1,198 @@
 import streamlit as st
 
-# ---------------- CONFIG ----------------
-st.set_page_config(
-    page_title="Fortuna MX",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+st.set_page_config(layout="wide")
 
-# ---------------- ESTADO ----------------
-if "menu_open" not in st.session_state:
-    st.session_state.menu_open = False
+# -------- ESTADO --------
+if "menu" not in st.session_state:
+    st.session_state.menu = False
 
-if "page" not in st.session_state:
-    st.session_state.page = "inicio"
-
-def go(page):
-    st.session_state.page = page
-    st.session_state.menu_open = False
-
-# ---------------- CSS ----------------
+# -------- CSS --------
 st.markdown("""
 <style>
-html, body, [class*="css"] {
-    margin: 0 !important;
-    padding: 0 !important;
-}
 
-.stApp {
-    background-color: #0b1118;
-}
-
-header {display:none;}
-[data-testid="stHeader"] {display:none;}
-
-.block-container {
-    padding-top: 0 !important;
+/* RESET */
+html, body, .stApp {
+    margin: 0;
+    padding: 0;
+    background: #0f1b2a;
+    color: white;
 }
 
 /* HEADER */
-.custom-header {
+.header {
     position: fixed;
     top: 0;
-    left: 0;
-    right: 0;
+    width: 100%;
     height: 70px;
-    background: #1a232e;
-    z-index: 9999;
-    border-bottom: 1px solid #2d343f;
+    background: #162334;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    z-index: 999;
 }
 
 /* LOGO */
-.logo {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
+.logo img {
+    height: 35px;
 }
 
-/* DERECHA */
-.right-box {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
+/* RIGHT BUTTONS */
+.right {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     align-items: center;
 }
 
-/* BOTONES */
-.btn {
-    background: #76b82a;
-    padding: 8px 14px;
-    border-radius: 6px;
-    font-weight: bold;
+.deposit {
+    background: #6be234;
     color: black;
-    font-size: 13px;
-}
-
-.saldo {
-    background: #2d343f;
-    padding: 8px 12px;
-    border-radius: 6px;
-    color: white;
+    padding: 8px 14px;
+    border-radius: 8px;
     font-weight: bold;
 }
 
-/* MENU */
-.menu-box {
-    position: fixed;
-    top: 70px;
-    right: 15px;
-    width: 200px;
-    background: #1a232e;
-    border: 1px solid #2d343f;
-    border-radius: 10px;
-    padding: 10px;
-    z-index: 9999;
+.balance {
+    background: #2c3a4d;
+    padding: 8px 12px;
+    border-radius: 8px;
 }
 
-/* CONTENIDO */
-.main {
+.user {
+    background: #2c3a4d;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* BANNER */
+.banner {
     margin-top: 80px;
 }
+
+.banner img {
+    border-radius: 15px;
+}
+
+/* CATEGORÍAS */
+.cats {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    margin-top: 15px;
+}
+
+.cat {
+    min-width: 90px;
+    background: #1c2b3f;
+    padding: 12px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+/* GRID JUEGOS */
+.games {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+}
+
+.game img {
+    border-radius: 12px;
+    width: 120px;
+}
+
+/* FOOTER */
+.footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: rgba(20,30,45,0.9);
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    backdrop-filter: blur(10px);
+}
+
+/* BOTÓN FLOTANTE */
+.search {
+    position: fixed;
+    bottom: 60px;
+    right: 20px;
+    background: radial-gradient(circle, #ff2d75, #a800ff);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- HEADER ----------------
-st.markdown('<div class="custom-header">', unsafe_allow_html=True)
+# -------- HEADER --------
+st.markdown("""
+<div class="header">
+    <div class="logo">
+        <img src="https://i.imgur.com/8Km9tLL.png">
+    </div>
+    <div class="right">
+        <div class="deposit">💳 Deposita</div>
+        <div class="balance">$0.32</div>
+        <div class="user">👤</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-# Logo
-st.markdown('<div class="logo">', unsafe_allow_html=True)
-st.image("Logo.jpg", width=100)
-st.markdown('</div>', unsafe_allow_html=True)
+# -------- BANNER --------
+st.markdown("""
+<div class="banner">
+    <img src="https://images.unsplash.com/photo-1601597111158-2fceff292cdc?w=1200">
+</div>
+""", unsafe_allow_html=True)
 
-# Botones derecha
-st.markdown('<div class="right-box">', unsafe_allow_html=True)
+# -------- CATEGORÍAS --------
+st.markdown("""
+<div class="cats">
+    <div class="cat">🔍</div>
+    <div class="cat">🏠 Hogar</div>
+    <div class="cat">🆕 Nuevo</div>
+    <div class="cat">🎰 Slots</div>
+    <div class="cat">🔥 En Vivo</div>
+</div>
+""", unsafe_allow_html=True)
 
-col1, col2, col3 = st.columns([2,2,1])
+st.markdown("### Sigue Jugando")
 
-with col1:
-    if st.button("📥 Depositar"):
-        go("depositos")
+# -------- JUEGOS --------
+st.markdown("""
+<div class="games">
+    <div class="game"><img src="https://i.imgur.com/3ZQ3Z3K.png"></div>
+    <div class="game"><img src="https://i.imgur.com/0rVeh4A.png"></div>
+    <div class="game"><img src="https://i.imgur.com/ZK7dF8R.png"></div>
+    <div class="game"><img src="https://i.imgur.com/3ZQ3Z3K.png"></div>
+</div>
+""", unsafe_allow_html=True)
 
-with col2:
-    st.markdown('<div class="saldo">$ 5,000.00</div>', unsafe_allow_html=True)
+st.markdown("### Winpot Popular")
 
-with col3:
-    if st.button("👤"):
-        st.session_state.menu_open = not st.session_state.menu_open
+st.markdown("""
+<div class="games">
+    <div class="game"><img src="https://i.imgur.com/0rVeh4A.png"></div>
+    <div class="game"><img src="https://i.imgur.com/ZK7dF8R.png"></div>
+    <div class="game"><img src="https://i.imgur.com/3ZQ3Z3K.png"></div>
+</div>
+""", unsafe_allow_html=True)
 
-st.markdown('</div>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
+# -------- FOOTER --------
+st.markdown("""
+<div class="footer">
+    <div>🏠 Inicio</div>
+    <div>💳 Deposita</div>
+    <div>🎥 En Vivo</div>
+    <div>☰ Menú</div>
+</div>
 
-# ---------------- MENU ----------------
-if st.session_state.menu_open:
-    st.markdown('<div class="menu-box">', unsafe_allow_html=True)
-
-    if st.button("💸 Retiros"):
-        go("retiros")
-
-    if st.button("📥 Depósitos"):
-        go("depositos")
-
-    if st.button("💬 Mensajes"):
-        go("mensajes")
-
-    if st.button("🚪 Cerrar sesión"):
-        go("logout")
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# ---------------- CONTENIDO ----------------
-st.markdown('<div class="main">', unsafe_allow_html=True)
-
-# -------- PANTALLAS --------
-
-if st.session_state.page == "inicio":
-
-    st.image(
-        "https://images.unsplash.com/photo-1518623489648-a173ef7824f3?w=1200",
-        use_container_width=True
-    )
-
-    st.markdown("### 🎮 Sigue jugando")
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.image("https://images.unsplash.com/photo-1596711762462-850f28584813?w=400")
-        st.button("JUGAR", key="g1")
-
-    with col2:
-        st.image("https://images.unsplash.com/photo-1596711762462-850f28584813?w=400")
-        st.button("JUGAR", key="g2")
-
-elif st.session_state.page == "depositos":
-
-    st.markdown("## 📥 Depósitos")
-
-    monto = st.number_input("Monto", min_value=100, step=100)
-
-    if st.button("Confirmar"):
-        st.success(f"Depósito de ${monto} realizado")
-
-    if st.button("⬅ Volver"):
-        go("inicio")
-
-elif st.session_state.page == "retiros":
-
-    st.markdown("## 💸 Retiros")
-
-    monto = st.number_input("Monto a retirar", min_value=100, step=100)
-
-    if st.button("Solicitar"):
-        st.warning(f"Retiro de ${monto} en proceso")
-
-    if st.button("⬅ Volver"):
-        go("inicio")
-
-elif st.session_state.page == "mensajes":
-
-    st.markdown("## 💬 Mensajes")
-    st.info("No tienes mensajes")
-
-    if st.button("⬅ Volver"):
-        go("inicio")
-
-elif st.session_state.page == "logout":
-
-    st.markdown("## 🚪 Sesión cerrada")
-    st.success("Has cerrado sesión")
-
-    if st.button("Ir al inicio"):
-        go("inicio")
-
-st.markdown('</div>', unsafe_allow_html=True)
+<div class="search">🔍</div>
+""", unsafe_allow_html=True)

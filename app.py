@@ -6,7 +6,7 @@ st.set_page_config(layout="wide")
 
 # ---------------- ESTADO ----------------
 if "saldo" not in st.session_state:
-    st.session_state.saldo = 1000
+    st.session_state.saldo = 1000.00
 
 if "menu" not in st.session_state:
     st.session_state.menu = False
@@ -14,134 +14,180 @@ if "menu" not in st.session_state:
 # ---------------- ESTILOS ----------------
 st.markdown("""
 <style>
-/* Quitar espacio superior innecesario */
+/* Fondo general oscuro */
 .block-container {
     padding-top: 1rem;
+    background-color: #0f172a;
+    color: #f8fafc;
 }
 
-/* Contenedor para alinear el saldo y el icono de persona */
-.right-align {
+/* HEADER */
+.header {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
+    padding: 10px 0px;
+    margin-bottom: 20px;
 }
 
-/* Estilo para la caja de saldo */
-.balance-box {
-    background-color: #2c3a4d;
-    color: white;
-    padding: 6px 15px;
+/* RIGHT SIDE HEADER */
+.right-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* BOTÓN DEPOSITAR - Estilo original */
+.stButton>button {
     border-radius: 8px;
     font-weight: bold;
+}
+
+/* Caja de Saldo */
+.balance-box {
+    background-color: #1e293b;
+    color: #f8fafc;
+    padding: 6px 15px;
+    border-radius: 8px;
     font-size: 14px;
-    border: 1px solid #3d4e63;
+    border: 1px solid #334155;
+    height: 38px;
     display: flex;
     align-items: center;
+    font-weight: 600;
+}
+
+/* Icono de Persona */
+.user-circle {
+    background-color: #334155;
+    color: white;
+    width: 38px;
     height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
 }
 
-/* Ajuste de los botones para que no se desalineen */
-.stButton>button {
-    width: 100%;
-    border-radius: 8px;
-}
-
-/* Estilo del menú flotante */
-.menu-dropdown {
-    position: absolute;
-    right: 0;
-    top: 10px;
-    background: #1e2a38;
+/* Tarjetas de Juegos */
+.game-card {
+    background: #1e293b;
     padding: 15px;
-    border-radius: 10px;
-    width: 180px;
+    border-radius: 15px;
+    text-align: center;
+    border: 1px solid #334155;
+    transition: 0.3s;
+}
+
+.game-title {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 5px;
+    color: #f1f5f9;
+}
+
+.developer-tag {
+    color: #94a3b8;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Footer Nav */
+.footer-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #0f172a;
+    display: flex;
+    justify-content: space-around;
+    padding: 12px;
+    border-top: 1px solid #334155;
     z-index: 1000;
-    border: 1px solid #3d4e63;
-    box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
 }
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------- HEADER ----------------
-# Usamos una distribución de columnas donde la última sea para los elementos de la derecha
-col_logo, col_espacio, col_derecha = st.columns([2, 2, 3])
+col_logo, col_actions = st.columns([1, 1])
 
 with col_logo:
-    # Ajustamos el tamaño para que luzca bien
     try:
+        # Restauramos tu logotipo original conservando su tamaño
         logo = Image.open("Logo.jpg")
         st.image(logo, width=180)
     except:
-        st.subheader("FORTUNA MX")
+        st.markdown("<h2 style='color: #d4af37; margin:0;'>FORTUNA MX</h2>", unsafe_allow_html=True)
 
-with col_derecha:
-    # Sub-columnas internas para alinear Depositar, Saldo y Perfil
-    c1, c2, c3 = st.columns([1, 1, 0.4])
+with col_actions:
+    # Alineamos saldo y persona a la derecha
+    c1, c2, c3 = st.columns([1, 0.8, 0.3])
     
     with c1:
-        if st.button("💳 Depositar"):
+        if st.button("💳 Depositar", use_container_width=True):
             st.session_state.saldo += 500
             st.rerun()
-
+            
     with c2:
-        st.markdown(f"""
-            <div class="right-align">
-                <div class="balance-box">${st.session_state.saldo}</div>
-            </div>
-        """, unsafe_allow_html=True)
-
+        st.markdown(f"<div class='balance-box'>${st.session_state.saldo:,.2f}</div>", unsafe_allow_html=True)
+        
     with c3:
         if st.button("👤"):
             st.session_state.menu = not st.session_state.menu
             st.rerun()
 
-# ---------------- MENÚ DESPLEGABLE ----------------
-if st.session_state.menu:
-    with col_derecha:
-        st.markdown("""
-        <div class='menu-dropdown'>
-            💸 <b>Retiros</b><br><hr style='margin:10px 0; opacity:0.2;'>
-            💳 <b>Depósitos</b><br><hr style='margin:10px 0; opacity:0.2;'>
-            💬 <b>Mensajes</b><br><hr style='margin:10px 0; opacity:0.2;'>
-            🚪 <b>Cerrar sesión</b>
-        </div>
-        """, unsafe_allow_html=True)
-
-st.write("---")
-
-# ---------------- BANNER Y CONTENIDO ----------------
+# ---------------- BANNER ----------------
 st.image("https://images.unsplash.com/photo-1601597111158-2fceff292cdc", use_column_width=True)
 
-st.markdown("## 🎰 Sigue Jugando")
+# ---------------- SECCIONES DE JUEGOS ----------------
+st.markdown("### 🎰 SIGUE JUGANDO")
 
-# ---------------- LÓGICA CASINO ----------------
-def jugar(costo):
-    if st.session_state.saldo >= costo:
-        if random.random() < 0.4:
-            ganancia = costo * 2
-            st.session_state.saldo += ganancia
-            st.toast(f"¡Ganaste ${ganancia}!", icon="🎉")
-        else:
-            st.session_state.saldo -= costo
-            st.toast(f"Perdiste ${costo}", icon="😞")
-    else:
-        st.error("Saldo insuficiente")
+def render_game(titulo, developer, key):
+    st.markdown(f"""
+    <div class='game-card'>
+        <div class='game-title'>{titulo}</div>
+        <div class='developer-tag'>{developer}</div>
+    </div>
+    """, unsafe_allow_html=True)
+    if st.button(f"Jugar", key=key, use_container_width=True):
+        st.toast(f"Cargando {titulo}...")
 
-# ---------------- JUEGOS ----------------
-j1, j2, j3 = st.columns(3)
+cols = st.columns(4)
+juegos = [
+    ("30 Spicy Fruits", "FORTUNA GAMES"),
+    ("40 Shining Crown", "EGT"),
+    ("Leprechaun Hot", "PRAGMATIC"),
+    ("Mega Slot 777", "FORTUNA GAMES")
+]
 
-with j1:
-    st.markdown("<div style='background:#13263a; padding:20px; border-radius:12px; text-align:center;'>🍒 Slot Básico</div>", unsafe_allow_html=True)
-    if st.button("Jugar $50", key="b1"):
-        jugar(50)
+for i, (titulo, dev) in enumerate(juegos):
+    with cols[i]:
+        render_game(titulo, dev, f"game_{i}")
 
-with j2:
-    st.markdown("<div style='background:#13263a; padding:20px; border-radius:12px; text-align:center;'>👑 Slot Premium</div>", unsafe_allow_html=True)
-    if st.button("Jugar $100", key="b2"):
-        jugar(100)
+st.markdown("### 🔥 POPULARES")
+cols_pop = st.columns(4)
+populares = [
+    ("Hot Blast", "RUBYPLAY"),
+    ("Mad Hit Gold", "RUBYPLAY"),
+    ("Voltage Rapid", "EGT"),
+    ("Aztec Gold", "FORTUNA GAMES")
+]
 
-with j3:
-    st.markdown("<div style='background:#13263a; padding:20px; border-radius:12px; text-align:center;'>💎 Mega Slot</div>", unsafe_allow_html=True)
-    if st.button("Jugar $200", key="b3"):
-        jugar(200)
+for i, (titulo, dev) in enumerate(populares):
+    with cols_pop[i]:
+        render_game(titulo, dev, f"pop_{i}")
+
+# Espacio para el footer
+st.markdown("<br><br><br>", unsafe_allow_html=True)
+
+# ---------------- BARRA INFERIOR ----------------
+st.markdown("""
+<div class='footer-nav'>
+    <div style='text-align:center; color:#94a3b8;'>🏠<br><small>Inicio</small></div>
+    <div style='text-align:center; color:#94a3b8;'>💰<br><small>Depósitos</small></div>
+    <div style='text-align:center; color:#94a3b8;'>🎲<br><small>En Vivo</small></div>
+    <div style='text-align:center; color:#94a3b8;'>☰<br><small>Menú</small></div>
+</div>
+""", unsafe_allow_html=True)

@@ -1,103 +1,97 @@
 import streamlit as st
 
-# 1. CONFIGURACIÓN DE LA PÁGINA
+# CONFIGURACIÓN
 st.set_page_config(
     page_title="Fortuna MX",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# ✅ URL CORRECTA DEL LOGO (respeta mayúsculas)
-logo_url = "https://raw.githubusercontent.com/ManuelG-Prog/casino-demo/principal/Logo.jpg"
-
-# 2. CSS + HEADER
-st.markdown(f"""
+# OCULTAR HEADER NATIVO
+st.markdown("""
     <style>
-    .stApp {{ background-color: #0b1118; }}
-    header {{visibility: hidden;}}
-    [data-testid="stHeader"] {{display: none;}}
-    div.block-container {{padding-top: 0rem;}}
+    .stApp { background-color: #0b1118; }
+    header {visibility: hidden;}
+    [data-testid="stHeader"] {display: none;}
+    div.block-container {padding-top: 10px;}
 
     /* HEADER */
-    .custom-header {{
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 15px;
-        background-color: #1a232e;
+    .custom-header {
         position: fixed;
         top: 0; left: 0; right: 0;
+        height: 70px;
+        background: #1a232e;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 15px;
         z-index: 9999;
-        height: 65px;
         border-bottom: 1px solid #2d343f;
-    }}
+    }
 
-    .logo-img {{
-        height: 38px;
-    }}
-
-    .header-right {{
+    .right-box {
         display: flex;
         align-items: center;
         gap: 8px;
-    }}
+    }
 
-    .btn-dep {{
-        background-color: #76b82a;
-        color: black !important;
+    .btn {
+        background: #76b82a;
         padding: 8px 14px;
         border-radius: 6px;
         font-weight: bold;
+        color: black;
         font-size: 13px;
-        text-decoration: none;
-    }}
+    }
 
-    .bal-badge {{
-        background-color: #2d343f;
-        color: white;
+    .saldo {
+        background: #2d343f;
         padding: 8px 12px;
         border-radius: 6px;
-        font-weight: bold;
-        font-size: 13px;
-    }}
-
-    .main-body {{
-        margin-top: 80px;
-    }}
-
-    .game-title {{
         color: white;
         font-weight: bold;
-        margin: 20px 0 10px 0;
-        text-transform: uppercase;
-        font-size: 14px;
-    }}
+        font-size: 13px;
+    }
 
-    .footer-nav {{
+    .main {
+        margin-top: 90px;
+    }
+
+    .footer {
         position: fixed;
-        bottom: 0; left: 0; right: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
         background: #1a232e;
         display: flex;
         justify-content: space-around;
         padding: 12px 0;
         border-top: 1px solid #2d343f;
-        z-index: 9999;
-    }}
+    }
     </style>
-
-    <!-- HEADER -->
-    <div class="custom-header">
-        <img src="{logo_url}" class="logo-img">
-        <div class="header-right">
-            <a class="btn-dep">📥 Depositar</a>
-            <div class="bal-badge">$ 5,000.00</div>
-            <div style="font-size: 24px; color: #8a96a3;">👤</div>
-        </div>
-    </div>
 """, unsafe_allow_html=True)
 
-# 3. CONTENIDO
-st.markdown('<div class="main-body">', unsafe_allow_html=True)
+# HEADER CON LOGO LOCAL
+st.markdown('<div class="custom-header">', unsafe_allow_html=True)
+
+col1, col2 = st.columns([1, 3])
+
+with col1:
+    st.image("Logo.jpg", width=110)
+
+with col2:
+    st.markdown("""
+        <div class="right-box">
+            <div class="btn">📥 Depositar</div>
+            <div class="saldo">$ 5,000.00</div>
+            <div style="font-size:22px; color:#8a96a3;">👤</div>
+        </div>
+    """, unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# CONTENIDO
+st.markdown('<div class="main">', unsafe_allow_html=True)
 
 # Banner
 st.image(
@@ -105,9 +99,13 @@ st.image(
     use_container_width=True
 )
 
-# Juegos
-st.markdown('<div class="game-title">Sigue Jugando</div>', unsafe_allow_html=True)
+# Título
+st.markdown(
+    '<div style="color:white; font-weight:bold; margin:20px 0 10px;">SIGUE JUGANDO</div>',
+    unsafe_allow_html=True
+)
 
+# Juegos
 col1, col2 = st.columns(2)
 
 with col1:
@@ -126,13 +124,13 @@ with col2:
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# 4. FOOTER
+# FOOTER
 st.markdown("""
-    <div class="footer-nav">
-        <div style="text-align: center; color: white; font-size: 10px;">🏠<br>Inicio</div>
-        <div style="text-align: center; color: #76b82a; font-size: 10px;">📥<br>Depositar</div>
-        <div style="text-align: center; color: white; font-size: 10px;">🎰<br>Slots</div>
-        <div style="text-align: center; color: white; font-size: 10px;">☰<br>Menú</div>
+    <div class="footer">
+        <div style="text-align:center; color:white; font-size:10px;">🏠<br>Inicio</div>
+        <div style="text-align:center; color:#76b82a; font-size:10px;">📥<br>Depositar</div>
+        <div style="text-align:center; color:white; font-size:10px;">🎰<br>Slots</div>
+        <div style="text-align:center; color:white; font-size:10px;">☰<br>Menú</div>
     </div>
-    <div style="height: 70px;"></div>
+    <div style="height:70px;"></div>
 """, unsafe_allow_html=True)

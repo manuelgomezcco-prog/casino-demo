@@ -2,7 +2,6 @@ import streamlit as st
 from PIL import Image
 import random
 
-# ---------------- CONFIG ----------------
 st.set_page_config(layout="wide")
 
 # ---------------- ESTADO ----------------
@@ -15,12 +14,10 @@ if "menu" not in st.session_state:
 # ---------------- ESTILOS ----------------
 st.markdown("""
 <style>
-body {
-    background-color: #0b1c2c;
-}
 
+/* Quitar espacio arriba */
 .block-container {
-    padding-top: 1rem;
+    padding-top: 0.5rem;
 }
 
 /* HEADER */
@@ -28,27 +25,29 @@ body {
     display:flex;
     justify-content:space-between;
     align-items:center;
-    padding:10px 0;
+    margin-bottom:20px;
 }
 
-.logo {
-    height:60px;
+/* LOGO */
+.logo img {
+    height:70px;
 }
 
-.right-box {
+/* RIGHT SIDE */
+.right {
     display:flex;
-    gap:10px;
     align-items:center;
+    gap:10px;
 }
 
-/* BOTÓN DEPOSITAR */
-.deposit-btn {
+/* BOTÓN */
+.deposit {
     background:#4cd137;
     color:white;
     padding:8px 14px;
     border-radius:8px;
-    font-weight:bold;
     font-size:14px;
+    font-weight:bold;
 }
 
 /* SALDO */
@@ -60,11 +59,10 @@ body {
 }
 
 /* USER */
-.user-btn {
+.user {
     background:#2c3a4d;
     padding:6px 10px;
     border-radius:6px;
-    cursor:pointer;
 }
 
 /* MENÚ */
@@ -75,43 +73,40 @@ body {
     background:#1e2a38;
     padding:15px;
     border-radius:10px;
+    width:150px;
 }
 
-/* TARJETAS */
+/* CARDS */
 .card {
     background:#13263a;
-    padding:15px;
+    padding:20px;
     border-radius:12px;
     text-align:center;
 }
 
-/* BOTÓN JUGAR */
-.play-btn {
-    background:#e84118;
-    color:white;
-    padding:6px 12px;
-    border-radius:6px;
-}
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------- HEADER ----------------
 logo = Image.open("Logo.jpg")
 
-col1, col2 = st.columns([2,3])
+col1, col2 = st.columns([3,2])
 
 with col1:
-    st.image(logo, width=140)
+    st.image(logo, width=160)
 
 with col2:
-    c1, c2, c3 = st.columns([1,1,1])
+    c1, c2, c3 = st.columns([1.2,1,0.6])
 
     with c1:
         if st.button("💳 Depositar"):
             st.session_state.saldo += 500
 
     with c2:
-        st.markdown(f"<div class='balance'>${st.session_state.saldo}</div>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div class='balance'>${st.session_state.saldo}</div>",
+            unsafe_allow_html=True
+        )
 
     with c3:
         if st.button("👤"):
@@ -133,13 +128,10 @@ st.image("https://images.unsplash.com/photo-1601597111158-2fceff292cdc", use_col
 
 st.markdown("## 🎰 Sigue Jugando")
 
-# ---------------- JUEGOS ----------------
-col1, col2, col3 = st.columns(3)
-
+# ---------------- LÓGICA CASINO ----------------
 def jugar(costo):
     if st.session_state.saldo >= costo:
-        resultado = random.choice(["ganar", "perder"])
-        if resultado == "ganar":
+        if random.random() < 0.4:  # 40% ganar
             ganancia = costo * 2
             st.session_state.saldo += ganancia
             st.success(f"Ganaste ${ganancia}")
@@ -149,17 +141,20 @@ def jugar(costo):
     else:
         st.warning("Saldo insuficiente")
 
+# ---------------- JUEGOS ----------------
+col1, col2, col3 = st.columns(3)
+
 with col1:
     st.markdown("<div class='card'>🍒 Slot Básico</div>", unsafe_allow_html=True)
-    if st.button("Jugar $50", key="j1"):
+    if st.button("Jugar $50"):
         jugar(50)
 
 with col2:
     st.markdown("<div class='card'>👑 Slot Premium</div>", unsafe_allow_html=True)
-    if st.button("Jugar $100", key="j2"):
+    if st.button("Jugar $100"):
         jugar(100)
 
 with col3:
     st.markdown("<div class='card'>💎 Mega Slot</div>", unsafe_allow_html=True)
-    if st.button("Jugar $200", key="j3"):
+    if st.button("Jugar $200"):
         jugar(200)

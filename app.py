@@ -7,88 +7,58 @@ st.set_page_config(layout="wide")
 if "menu" not in st.session_state:
     st.session_state.menu = False
 
-# ---------------- CSS GLOBAL ----------------
+# ---------------- CSS ----------------
 st.markdown("""
 <style>
-html, body, .stApp {
-    margin: 0;
-    padding: 0;
-    background: #0f1b2a;
-    color: white;
-}
-
 header {display:none;}
 [data-testid="stHeader"] {display:none;}
-.block-container {padding-top: 0 !important;}
+.block-container {padding-top: 0rem;}
 
-/* MENU DESPLEGABLE */
+.main {
+    background:#0f1b2a;
+    color:white;
+}
+
+/* menú */
 .menu-box {
     position: fixed;
     top: 70px;
     right: 10px;
-    width: 200px;
     background: #1a232e;
-    border-radius: 10px;
     padding: 10px;
+    border-radius: 10px;
     z-index: 9999;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- HEADER ----------------
-st.markdown("""
-<div style="
-position:fixed;
-top:0;
-left:0;
-right:0;
-height:65px;
-background:#162334;
-z-index:9999;
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:0 12px;
-">
+# -------- HEADER REAL (SIN HTML ROTO) --------
+with st.container():
+    col1, col2, col3 = st.columns([2, 5, 3])
 
-    <!-- LOGO -->
-    <img src="Logo.jpg" style="height:40px; border-radius:6px;">
+    with col1:
+        st.image("Logo.jpg", width=90)
 
-    <!-- DERECHA -->
-    <div style="display:flex; gap:6px; align-items:center;">
+    with col3:
+        c1, c2, c3 = st.columns([2,2,1])
 
-        <div style="
-        background:#6be234;
-        color:black;
-        padding:6px 10px;
-        border-radius:6px;
-        font-weight:bold;
-        font-size:12px;">
-        💳 Deposita
-        </div>
+        with c1:
+            st.markdown(
+                '<div style="background:#6be234;padding:6px;border-radius:6px;text-align:center;font-size:12px;">💳 Deposita</div>',
+                unsafe_allow_html=True
+            )
 
-        <div style="
-        background:#2c3a4d;
-        padding:6px 10px;
-        border-radius:6px;
-        font-size:12px;">
-        $0.32
-        </div>
+        with c2:
+            st.markdown(
+                '<div style="background:#2c3a4d;padding:6px;border-radius:6px;text-align:center;font-size:12px;">$0.32</div>',
+                unsafe_allow_html=True
+            )
 
-    </div>
+        with c3:
+            if st.button("👤"):
+                st.session_state.menu = not st.session_state.menu
 
-</div>
-""", unsafe_allow_html=True)
-
-# -------- BOTÓN USUARIO (👤) --------
-st.markdown('<div style="position:fixed; top:12px; right:10px; z-index:10000;">', unsafe_allow_html=True)
-
-if st.button("👤"):
-    st.session_state.menu = not st.session_state.menu
-
-st.markdown('</div>', unsafe_allow_html=True)
-
-# ---------------- MENÚ ----------------
+# -------- MENÚ --------
 if st.session_state.menu:
     st.markdown("""
     <div class="menu-box">
@@ -99,76 +69,21 @@ if st.session_state.menu:
     </div>
     """, unsafe_allow_html=True)
 
-# -------- ESPACIO SUPERIOR --------
-st.markdown('<div style="margin-top:80px;"></div>', unsafe_allow_html=True)
-
-# ---------------- CONTENIDO ----------------
-
-# Banner
+# -------- CONTENIDO --------
 st.image(
     "https://images.unsplash.com/photo-1601597111158-2fceff292cdc?w=1200",
     use_container_width=True
 )
 
-# Categorías
-st.markdown("""
-<div style="display:flex; gap:10px; overflow-x:auto; margin-top:15px;">
-    <div style="min-width:90px; background:#1c2b3f; padding:12px; border-radius:12px;">🔍</div>
-    <div style="min-width:90px; background:#1c2b3f; padding:12px; border-radius:12px;">🏠 Hogar</div>
-    <div style="min-width:90px; background:#1c2b3f; padding:12px; border-radius:12px;">🆕 Nuevo</div>
-    <div style="min-width:90px; background:#1c2b3f; padding:12px; border-radius:12px;">🎰 Slots</div>
-    <div style="min-width:90px; background:#1c2b3f; padding:12px; border-radius:12px;">🔥 En Vivo</div>
-</div>
-""", unsafe_allow_html=True)
-
-# Título
 st.markdown("## Sigue Jugando")
 
-# Juegos
-st.markdown("""
-<div style="display:flex; gap:10px; overflow-x:auto;">
-    <img src="https://picsum.photos/200" style="border-radius:12px; width:120px;">
-    <img src="https://picsum.photos/201" style="border-radius:12px; width:120px;">
-    <img src="https://picsum.photos/202" style="border-radius:12px; width:120px;">
-    <img src="https://picsum.photos/203" style="border-radius:12px; width:120px;">
-</div>
-""", unsafe_allow_html=True)
+col1, col2, col3 = st.columns(3)
 
-# -------- BOTÓN FLOTANTE --------
-st.markdown("""
-<div style="
-position:fixed;
-bottom:70px;
-right:20px;
-background: radial-gradient(circle, #ff2d75, #a800ff);
-width:60px;
-height:60px;
-border-radius:50%;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:20px;
-z-index:9999;
-">
-🔍
-</div>
-""", unsafe_allow_html=True)
+with col1:
+    st.image("https://picsum.photos/200")
 
-# -------- FOOTER --------
-st.markdown("""
-<div style="
-position:fixed;
-bottom:0;
-width:100%;
-background:rgba(20,30,45,0.95);
-display:flex;
-justify-content:space-around;
-padding:10px 0;
-font-size:12px;
-">
-<div>🏠 Inicio</div>
-<div>💳 Deposita</div>
-<div>🎥 En Vivo</div>
-<div>☰ Menú</div>
-</div>
-""", unsafe_allow_html=True)
+with col2:
+    st.image("https://picsum.photos/201")
+
+with col3:
+    st.image("https://picsum.photos/202")

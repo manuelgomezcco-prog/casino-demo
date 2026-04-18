@@ -21,7 +21,7 @@ header {display:none;}
 [data-testid="stHeader"] {display:none;}
 .block-container {padding-top: 0 !important;}
 
-/* MENU */
+/* MENU DESPLEGABLE */
 .menu-box {
     position: fixed;
     top: 70px;
@@ -35,7 +35,7 @@ header {display:none;}
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- HEADER (HTML PURO) ----------------
+# ---------------- HEADER ----------------
 st.markdown("""
 <div style="
 position:fixed;
@@ -76,19 +76,17 @@ padding:0 12px;
         </div>
 
     </div>
+
 </div>
 """, unsafe_allow_html=True)
 
-# -------- BOTÓN REAL 👤 (STREAMLIT) --------
-# Lo posicionamos encima del header
-st.markdown("""
-<div style="position:fixed; top:12px; right:10px; z-index:10000;">
-""", unsafe_allow_html=True)
+# -------- BOTÓN USUARIO (👤) --------
+st.markdown('<div style="position:fixed; top:12px; right:10px; z-index:10000;">', unsafe_allow_html=True)
 
-if st.button("👤", key="user_btn"):
+if st.button("👤"):
     st.session_state.menu = not st.session_state.menu
 
-st.markdown("</div>", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 # ---------------- MENÚ ----------------
 if st.session_state.menu:
@@ -101,7 +99,7 @@ if st.session_state.menu:
     </div>
     """, unsafe_allow_html=True)
 
-# -------- ESPACIO PARA NO TAPAR CONTENIDO --------
+# -------- ESPACIO SUPERIOR --------
 st.markdown('<div style="margin-top:80px;"></div>', unsafe_allow_html=True)
 
 # ---------------- CONTENIDO ----------------
@@ -123,6 +121,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# Título
 st.markdown("## Sigue Jugando")
 
 # Juegos
@@ -161,10 +160,11 @@ st.markdown("""
 position:fixed;
 bottom:0;
 width:100%;
-background:rgba(20,30,45,0.9);
+background:rgba(20,30,45,0.95);
 display:flex;
 justify-content:space-around;
 padding:10px 0;
+font-size:12px;
 ">
 <div>🏠 Inicio</div>
 <div>💳 Deposita</div>

@@ -1,12 +1,13 @@
 import streamlit as st
 
+# ---------------- CONFIG ----------------
 st.set_page_config(layout="wide")
 
-# -------- ESTADO --------
+# ---------------- ESTADO ----------------
 if "menu" not in st.session_state:
     st.session_state.menu = False
 
-# -------- CSS --------
+# ---------------- CSS ----------------
 st.markdown("""
 <style>
 
@@ -16,6 +17,13 @@ html, body, .stApp {
     padding: 0;
     background: #0f1b2a;
     color: white;
+}
+
+header {display:none;}
+[data-testid="stHeader"] {display:none;}
+
+.block-container {
+    padding-top: 0 !important;
 }
 
 /* HEADER */
@@ -33,17 +41,25 @@ html, body, .stApp {
 }
 
 /* LOGO */
-.logo img {
-    height: 35px;
+.logo {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
-/* RIGHT BUTTONS */
+/* DERECHA */
 .right {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
     gap: 10px;
     align-items: center;
 }
 
+/* BOTONES */
 .deposit {
     background: #6be234;
     color: black;
@@ -58,20 +74,27 @@ html, body, .stApp {
     border-radius: 8px;
 }
 
-.user {
+.user-btn button {
     background: #2c3a4d;
-    padding: 8px;
     border-radius: 8px;
-    cursor: pointer;
 }
 
-/* BANNER */
-.banner {
+/* MENÚ */
+.menu-box {
+    position: fixed;
+    top: 70px;
+    right: 15px;
+    width: 200px;
+    background: #1a232e;
+    border: 1px solid #2d343f;
+    border-radius: 10px;
+    padding: 10px;
+    z-index: 9999;
+}
+
+/* CONTENIDO */
+.main {
     margin-top: 80px;
-}
-
-.banner img {
-    border-radius: 15px;
 }
 
 /* CATEGORÍAS */
@@ -90,7 +113,7 @@ html, body, .stApp {
     text-align: center;
 }
 
-/* GRID JUEGOS */
+/* JUEGOS */
 .games {
     display: flex;
     gap: 10px;
@@ -111,13 +134,12 @@ html, body, .stApp {
     display: flex;
     justify-content: space-around;
     padding: 10px 0;
-    backdrop-filter: blur(10px);
 }
 
 /* BOTÓN FLOTANTE */
 .search {
     position: fixed;
-    bottom: 60px;
+    bottom: 70px;
     right: 20px;
     background: radial-gradient(circle, #ff2d75, #a800ff);
     width: 60px;
@@ -131,28 +153,53 @@ html, body, .stApp {
 </style>
 """, unsafe_allow_html=True)
 
-# -------- HEADER --------
-st.markdown("""
-<div class="header">
-    <div class="logo">
-        <img src="https://i.imgur.com/8Km9tLL.png">
-    </div>
-    <div class="right">
-        <div class="deposit">💳 Deposita</div>
-        <div class="balance">$0.32</div>
-        <div class="user">👤</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+# ---------------- HEADER ----------------
+st.markdown('<div class="header">', unsafe_allow_html=True)
 
-# -------- BANNER --------
-st.markdown("""
-<div class="banner">
-    <img src="https://images.unsplash.com/photo-1601597111158-2fceff292cdc?w=1200">
-</div>
-""", unsafe_allow_html=True)
+# LOGO (LOCAL - FUNCIONA SIEMPRE)
+st.markdown('<div class="logo">', unsafe_allow_html=True)
+st.image("Logo.jpg", width=110)
+st.markdown('</div>', unsafe_allow_html=True)
 
-# -------- CATEGORÍAS --------
+# BOTONES DERECHA
+st.markdown('<div class="right">', unsafe_allow_html=True)
+
+col1, col2, col3 = st.columns([2,2,1])
+
+with col1:
+    st.markdown('<div class="deposit">💳 Deposita</div>', unsafe_allow_html=True)
+
+with col2:
+    st.markdown('<div class="balance">$0.32</div>', unsafe_allow_html=True)
+
+with col3:
+    if st.button("👤", key="user_btn"):
+        st.session_state.menu = not st.session_state.menu
+
+st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
+
+# ---------------- MENÚ ----------------
+if st.session_state.menu:
+    st.markdown("""
+    <div class="menu-box">
+        <div>💸 Retiros</div>
+        <div>📥 Depósitos</div>
+        <div>💬 Mensajes</div>
+        <div>🚪 Cerrar sesión</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# ---------------- CONTENIDO ----------------
+st.markdown('<div class="main">', unsafe_allow_html=True)
+
+# BANNER
+st.image(
+    "https://images.unsplash.com/photo-1601597111158-2fceff292cdc?w=1200",
+    use_container_width=True
+)
+
+# CATEGORÍAS
 st.markdown("""
 <div class="cats">
     <div class="cat">🔍</div>
@@ -163,29 +210,21 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("### Sigue Jugando")
+st.markdown("## Sigue Jugando")
 
-# -------- JUEGOS --------
+# JUEGOS
 st.markdown("""
 <div class="games">
-    <div class="game"><img src="https://i.imgur.com/3ZQ3Z3K.png"></div>
-    <div class="game"><img src="https://i.imgur.com/0rVeh4A.png"></div>
-    <div class="game"><img src="https://i.imgur.com/ZK7dF8R.png"></div>
-    <div class="game"><img src="https://i.imgur.com/3ZQ3Z3K.png"></div>
+    <div class="game"><img src="https://picsum.photos/200"></div>
+    <div class="game"><img src="https://picsum.photos/201"></div>
+    <div class="game"><img src="https://picsum.photos/202"></div>
+    <div class="game"><img src="https://picsum.photos/203"></div>
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("### Winpot Popular")
+st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown("""
-<div class="games">
-    <div class="game"><img src="https://i.imgur.com/0rVeh4A.png"></div>
-    <div class="game"><img src="https://i.imgur.com/ZK7dF8R.png"></div>
-    <div class="game"><img src="https://i.imgur.com/3ZQ3Z3K.png"></div>
-</div>
-""", unsafe_allow_html=True)
-
-# -------- FOOTER --------
+# ---------------- FOOTER ----------------
 st.markdown("""
 <div class="footer">
     <div>🏠 Inicio</div>

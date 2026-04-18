@@ -7,8 +7,8 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# URL DEL LOGO (directo, sin base64)
-logo_url = "https://raw.githubusercontent.com/ManuelG-Prog/casino-demo/principal/logo.PNG"
+# ✅ URL CORRECTA DEL LOGO (respeta mayúsculas)
+logo_url = "https://raw.githubusercontent.com/ManuelG-Prog/casino-demo/principal/Logo.jpg"
 
 # 2. CSS + HEADER
 st.markdown(f"""

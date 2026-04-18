@@ -1,138 +1,130 @@
 import streamlit as st
 
-# 1. CONFIGURACIÓN INICIAL
+# 1. CONFIGURACIÓN
 st.set_page_config(page_title="Fortuna MX", layout="wide", initial_sidebar_state="collapsed")
 
-# 2. CSS DE ALTA FIDELIDAD (Estilo Winpot)
+# 2. CSS DE ALTA FIDELIDAD
 st.markdown("""
     <style>
-    /* Fondo y Reset */
-    .stApp { background-color: #0f172a; }
+    .stApp { background-color: #0b0e11; }
     header {visibility: hidden;}
+    [data-testid="stHeader"] {display: none;}
     
-    /* HEADER FIJO */
+    /* HEADER FIJO Y LIMPIO */
     .custom-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 10px 20px;
-        background-color: #0f172a;
+        padding: 10px 15px;
+        background-color: #1a1f26;
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         z-index: 1000;
-        height: 60px;
+        height: 65px;
+        border-bottom: 1px solid #2d343f;
     }
 
-    /* LOGOTIPO: Ajuste de claridad */
-    .logo-img {
-        height: 40px;
+    /* LOGO: Forzamos visibilidad */
+    .logo-container img {
+        max-height: 45px;
         width: auto;
-        object-fit: contain;
+        display: block;
     }
 
-    /* CONTENEDOR DE SALDO Y DEPÓSITO */
     .user-actions {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
     }
 
+    /* BOTÓN DEPOSITAR CORREGIDO */
     .deposit-btn {
         background-color: #76b82a;
-        color: black;
-        padding: 5px 12px;
-        border-radius: 5px;
+        color: #000 !important;
+        padding: 6px 14px;
+        border-radius: 6px;
         font-weight: bold;
-        font-size: 14px;
+        font-size: 13px;
         text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 5px;
     }
 
     .balance-badge {
-        background-color: #1e293b;
-        color: white;
-        padding: 5px 10px;
-        border-radius: 5px;
-        font-family: monospace;
-        border: 1px solid #334155;
+        background-color: #2d343f;
+        color: #fff;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: bold;
+        font-size: 13px;
+        border: 1px solid #3e4652;
     }
 
-    /* BANNER PRINCIPAL */
-    .main-banner {
+    /* Ajuste de Banner */
+    .banner-container {
+        margin-top: 80px;
         width: 100%;
+    }
+    .banner-container img {
         border-radius: 15px;
-        margin-top: 70px;
-        margin-bottom: 20px;
+        width: 100%;
     }
 
-    /* GRID DE JUEGOS */
-    .game-card {
-        border-radius: 10px;
-        overflow: hidden;
-        margin-bottom: 10px;
-        transition: transform 0.2s;
-    }
-    .game-card:hover { transform: scale(1.05); }
-    
-    /* Etiquetas de sección */
     .section-title {
         color: white;
-        font-size: 16px;
+        font-size: 15px;
         font-weight: bold;
-        margin: 20px 0 10px 0;
+        margin: 25px 0 15px 0;
         text-transform: uppercase;
-        letter-spacing: 1px;
     }
-
-    /* Ocultar elementos nativos que estorban */
-    [data-testid="stHeader"] {display: none;}
-    div.block-container {padding-top: 2rem;}
     </style>
     """, unsafe_allow_html=True)
 
-# 3. HEADER PERSONALIZADO (Logo siempre visible)
+# 3. LOGO Y HEADER (Corregido)
+# Usamos la URL raw de GitHub que es la que permite visualización directa
 logo_url = "https://raw.githubusercontent.com/ManuelG-Prog/casino-demo/principal/logo.PNG"
 
 st.markdown(f"""
     <div class="custom-header">
-        <img src="{logo_url}" class="logo-img">
+        <div class="logo-container">
+            <img src="{logo_url}" alt="Fortuna MX">
+        </div>
         <div class="user-actions">
-            <div class="deposit-btn">📥 Deposta</div>
+            <a class="deposit-btn">📥 Depositar</a>
             <div class="balance-badge">$ 5,000.00</div>
-            <div style="color: white; font-size: 20px;">👤</div>
+            <div style="color: #8a96a3; font-size: 22px; margin-left: 5px;">👤</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-# 4. BANNER (Imagen Principal)
-st.markdown('<img src="https://images.unsplash.com/photo-1518623489648-a173ef7824f3?w=1200" class="main-banner">', unsafe_allow_html=True)
-
-# 5. SECCIONES DE JUEGOS
-def render_section(titulo):
-    st.markdown(f'<div class="section-title">{titulo}</div>', unsafe_allow_html=True)
-    
-    # Usamos columnas de Streamlit para la rejilla
-    cols = st.columns(4) # 4 juegos por fila para que se vean grandes
-    for i in range(4):
-        with cols[i]:
-            # Contenedor de imagen de juego
-            st.markdown('<div class="game-card">', unsafe_allow_html=True)
-            st.image(f"https://images.unsplash.com/photo-1596711762462-850f28584813?w=300", use_container_width=True)
-            st.markdown('</div>', unsafe_allow_html=True)
-            st.button("JUGAR", key=f"{titulo}_{i}", use_container_width=True)
-
-# Dibujar las secciones
-render_section("Sigue Jugando")
-render_section("Fortuna Popular")
-
-# 6. MENÚ INFERIOR (Opcional, estilo móvil)
-st.markdown("""
-    <div style="position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; display: flex; justify-content: space-around; padding: 10px; border-top: 1px solid #334155; z-index: 1000;">
-        <div style="text-align: center; color: white; font-size: 10px;">🏠<br>Inicio</div>
-        <div style="text-align: center; color: white; font-size: 10px;">📥<br>Deposta</div>
-        <div style="text-align: center; color: white; font-size: 10px;">🎰<br>Slots</div>
-        <div style="text-align: center; color: white; font-size: 10px;">☰<br>Menú</div>
+# 4. CONTENIDO PRINCIPAL
+st.markdown(f"""
+    <div class="banner-container">
+        <img src="https://images.unsplash.com/photo-1518623489648-a173ef7824f3?w=1200">
     </div>
-    <div style="height: 60px;"></div>
+    """, unsafe_allow_html=True)
+
+st.markdown('<div class="section-title">Sigue Jugando</div>', unsafe_allow_html=True)
+
+# 5. CUADRÍCULA DE JUEGOS (Sin errores de ceros)
+cols = st.columns(2) # 2 columnas para que en móvil se vean bien grandes
+img_game = "https://images.unsplash.com/photo-1596711762462-850f28584813?w=400"
+
+for i in range(2):
+    with cols[i]:
+        st.image(img_game, use_container_width=True)
+        st.button("JUGAR", key=f"game_{i}", use_container_width=True)
+
+# 6. MENÚ INFERIOR ESTILO APP
+st.markdown("""
+    <div style="position: fixed; bottom: 0; left: 0; right: 0; background: #1a1f26; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #2d343f; z-index: 1000;">
+        <div style="text-align: center; color: white; font-size: 11px;">🏠<br>Inicio</div>
+        <div style="text-align: center; color: white; font-size: 11px;">📥<br>Depositar</div>
+        <div style="text-align: center; color: white; font-size: 11px;">🎰<br>Slots</div>
+        <div style="text-align: center; color: white; font-size: 11px;">☰<br>Menú</div>
+    </div>
+    <div style="height: 70px;"></div>
     """, unsafe_allow_html=True)

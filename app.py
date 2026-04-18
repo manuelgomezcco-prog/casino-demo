@@ -1,135 +1,131 @@
 import streamlit as st
-import base64
-import requests
 
-# 1. CONFIGURACIÓN
-st.set_page_config(page_title="Fortuna MX", layout="wide", initial_sidebar_state="collapsed")
+# 1. CONFIGURACIÓN DE LA PÁGINA
+st.set_page_config(
+    page_title="Fortuna MX",
+    page_icon="🍀",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
-# 2. FUNCIÓN ANTI-BLOQUEO (Usando Proxy de imágenes)
-@st.cache_data
-def get_base64_img(url):
-    # Usamos un proxy de imágenes para saltar el bloqueo de GitHub
-    proxy_url = f"https://images.weserv.nl/?url={url.replace('https://', '')}"
-    try:
-        response = requests.get(proxy_url, timeout=10)
-        if response.status_code == 200:
-            return base64.b64encode(response.content).decode()
-    except Exception as e:
-        return ""
-    return ""
-
-# URL corregida de tu logo
-url_logo = "raw.githubusercontent.com/ManuelG-Prog/casino-demo/principal/logo.PNG"
-logo_data = get_base64_img(url_logo)
-
-# 3. CSS PROFESIONAL
-st.markdown(f"""
+# 2. CSS PARA INTERFAZ PROFESIONAL (ESTILO WINPOT)
+st.markdown("""
     <style>
-    .stApp {{ background-color: #0b0e11; }}
-    [data-testid="stHeader"] {{display: none;}}
-    header {{visibility: hidden;}}
-    
-    .custom-header {{
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 5px 15px;
+    /* Fondo oscuro y eliminación de elementos nativos */
+    .stApp { background-color: #0b1118; }
+    header {visibility: hidden;}
+    [data-testid="stHeader"] {display: none;}
+    div.block-container {padding-top: 1rem; padding-bottom: 5rem;}
+
+    /* Contenedor del Saldo */
+    .balance-badge {
         background-color: #1a1f26;
-        position: fixed;
-        top: 0; left: 0; right: 0;
-        z-index: 99999;
-        height: 65px;
-        border-bottom: 1px solid #2d343f;
-    }}
-
-    /* Contenedor del Logo */
-    .logo-box {{
+        color: #ffffff;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: bold;
+        font-size: 14px;
+        border: 1px solid #2d343f;
         display: flex;
         align-items: center;
-        min-width: 120px;
-    }}
+        justify-content: center;
+    }
 
-    .logo-box img {{
-        max-height: 45px;
-        width: auto;
-        filter: drop-shadow(0px 0px 2px rgba(255,255,255,0.2));
-    }}
-
-    .user-actions {{
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }}
-
-    .deposit-btn {{
+    /* Botón Depositar Corregido */
+    .deposit-btn {
         background-color: #76b82a;
-        color: #000 !important;
-        padding: 8px 12px;
-        border-radius: 6px;
+        color: #000000 !important;
+        padding: 8px 15px;
+        border-radius: 8px;
         font-weight: bold;
-        font-size: 13px;
+        font-size: 14px;
         text-decoration: none;
-    }}
+        display: inline-block;
+        text-align: center;
+    }
 
-    .balance-badge {{
-        background-color: #2d343f;
-        color: #fff;
-        padding: 8px 10px;
-        border-radius: 6px;
-        font-weight: bold;
-        font-size: 13px;
-        border: 1px solid #3e4652;
-    }}
-
-    .main-content {{ margin-top: 85px; }}
-    
-    .section-title {{
-        color: white;
+    /* Estilo para las secciones de juegos */
+    .section-title {
+        color: #ffffff;
         font-size: 16px;
         font-weight: bold;
-        margin: 20px 0;
+        margin: 20px 0 10px 0;
         text-transform: uppercase;
-    }}
-    </style>
+    }
 
-    <div class="custom-header">
-        <div class="logo-box">
-            <img src="data:image/png;base64,{logo_data}" onerror="this.src='https://via.placeholder.com/150x50?text=Fortuna+MX'">
-        </div>
-        <div class="user-actions">
-            <a class="deposit-btn">📥 Depositar</a>
-            <div class="balance-badge">$ 5,000.00</div>
-            <div style="color: #8a96a3; font-size: 24px;">👤</div>
-        </div>
-    </div>
+    /* Ajuste de imágenes de juegos */
+    [data-testid="stImage"] img {
+        border-radius: 12px !important;
+        transition: transform 0.3s;
+    }
+    
+    /* Menú Inferior Fijo */
+    .footer-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: #1a1f26;
+        display: flex;
+        justify-content: space-around;
+        padding: 10px 0;
+        border-top: 1px solid #2d343f;
+        z-index: 1000;
+    }
+    </style>
     """, unsafe_allow_html=True)
 
-# 4. CONTENIDO
-st.markdown('<div class="main-content">', unsafe_allow_html=True)
+# 3. HEADER: LOGO, DEPÓSITO Y SALDO
+# Usamos columnas con proporciones específicas para que el logo tenga espacio
+h_col1, h_col2, h_col3, h_col4 = st.columns([3, 3, 3, 1])
 
-# Banner
+with h_col1:
+    # URL directa de GitHub
+    logo_url = "https://raw.githubusercontent.com/ManuelG-Prog/casino-demo/principal/logo.PNG"
+    st.image(logo_url, width=150)
+
+with h_col2:
+    # Botón de Depositar con ortografía corregida
+    st.markdown('<a class="deposit-btn">📥 Depositar</a>', unsafe_allow_html=True)
+
+with h_col3:
+    # Badge de saldo
+    st.markdown('<div class="balance-badge">$ 5,000.00</div>', unsafe_allow_html=True)
+
+with h_col4:
+    # Icono de perfil simple
+    st.markdown('<div style="font-size: 24px; text-align: right; color: #8a96a3;">👤</div>', unsafe_allow_html=True)
+
+# 4. CONTENIDO PRINCIPAL
+st.divider()
+
+# Banner Promocional
 st.image("https://images.unsplash.com/photo-1518623489648-a173ef7824f3?w=1200", use_container_width=True)
 
+# Sección "Sigue Jugando"
 st.markdown('<div class="section-title">Sigue Jugando</div>', unsafe_allow_html=True)
 
-# Rejilla limpia de 2 columnas
-c1, c2 = st.columns(2)
-with c1:
-    st.image("https://images.unsplash.com/photo-1596711762462-850f28584813?w=400", use_container_width=True)
-    st.button("JUGAR", key="g1", use_container_width=True)
-with c2:
-    st.image("https://images.unsplash.com/photo-1596711762462-850f28584813?w=400", use_container_width=True)
-    st.button("JUGAR", key="g2", use_container_width=True)
+# Cuadrícula de juegos (2 columnas para móvil para que no se vea amontonado)
+grid_col1, grid_col2 = st.columns(2)
+img_juego = "https://images.unsplash.com/photo-1596711762462-850f28584813?w=400"
 
-st.markdown('</div>', unsafe_allow_html=True)
+with grid_col1:
+    st.image(img_juego, use_container_width=True)
+    st.button("JUGAR", key="juego_1", use_container_width=True)
 
-# 5. MENÚ INFERIOR
+with grid_col2:
+    st.image(img_juego, use_container_width=True)
+    st.button("JUGAR", key="juego_2", use_container_width=True)
+
+# 5. MENÚ INFERIOR ESTILO APLICACIÓN
 st.markdown("""
-    <div style="position: fixed; bottom: 0; left: 0; right: 0; background: #1a1f26; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #2d343f; z-index: 99999;">
+    <div class="footer-nav">
         <div style="text-align: center; color: white; font-size: 11px;">🏠<br>Inicio</div>
         <div style="text-align: center; color: #76b82a; font-size: 11px;">📥<br>Depositar</div>
         <div style="text-align: center; color: white; font-size: 11px;">🎰<br>Slots</div>
         <div style="text-align: center; color: white; font-size: 11px;">☰<br>Menú</div>
     </div>
-    <div style="height: 70px;"></div>
     """, unsafe_allow_html=True)
+
+# Espaciador final para que el contenido no quede oculto tras el menú inferior
+st.markdown('<div style="height: 100px;"></div>', unsafe_allow_html=True)

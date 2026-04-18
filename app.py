@@ -1,152 +1,166 @@
 import streamlit as st
 
-# ---------------- CONFIG ----------------
-st.set_page_config(layout="wide")
+# -----------------------------
+# CONFIG
+# -----------------------------
+st.set_page_config(page_title="Fortuna MX", layout="wide")
 
-# ---------------- ESTADO ----------------
-if "menu" not in st.session_state:
-    st.session_state.menu = False
-
-if "page" not in st.session_state:
-    st.session_state.page = "inicio"
-
+# -----------------------------
+# ESTADO (SALDO)
+# -----------------------------
 if "saldo" not in st.session_state:
-    st.session_state.saldo = 100  # saldo inicial ficticio
+    st.session_state.saldo = 1000
 
-# ---------------- CSS ----------------
+# -----------------------------
+# FUNCIONES
+# -----------------------------
+def depositar():
+    st.session_state.saldo += 100
+
+def jugar(costo):
+    if st.session_state.saldo >= costo:
+        st.session_state.saldo -= costo
+        st.success(f"Jugaste (-${costo})")
+    else:
+        st.error("Saldo insuficiente")
+
+# -----------------------------
+# CSS
+# -----------------------------
 st.markdown("""
 <style>
-header {display:none;}
-[data-testid="stHeader"] {display:none;}
-.block-container {padding-top: 0rem;}
-
-.menu-box {
-    position: fixed;
-    top: 70px;
-    right: 10px;
-    background: #1a232e;
-    padding: 10px;
-    border-radius: 10px;
-    z-index: 9999;
-    width: 180px;
+body {
+    background-color: #0b1118;
 }
 
-.deposit-btn button {
-    background-color: #28a745 !important;
-    color: white !important;
-    font-weight: bold;
-    border-radius: 6px;
+/* HEADER */
+.header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 20px;
+    background:#111827;
+    border-radius:12px;
 }
 
-.balance-box {
+/* LOGO */
+.logo {
+    height:60px;
+}
+
+/* DERECHA */
+.right {
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+/* BOTÓN */
+.deposit {
+    background:#76b82a;
+    color:white;
+    padding:8px 14px;
+    border-radius:8px;
+    font-weight:bold;
+    font-size:13px;
+}
+
+/* SALDO */
+.balance {
     background:#2c3a4d;
-    padding:6px;
-    border-radius:6px;
-    text-align:center;
-    font-size:11px;
+    padding:6px 12px;
+    border-radius:8px;
+    font-size:12px;
+    color:white;
+}
+
+/* USER */
+.user {
+    background:#2c3a4d;
+    padding:6px 10px;
+    border-radius:8px;
+    font-size:16px;
+}
+
+/* TARJETAS */
+.card {
+    background:#16202b;
+    padding:10px;
+    border-radius:12px;
+}
+
+/* TITULOS */
+.title {
+    font-size:22px;
+    font-weight:bold;
+    margin-top:20px;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- HEADER ----------------
-col1, col2 = st.columns([6,4])
+# -----------------------------
+# HEADER
+# -----------------------------
+col1, col2 = st.columns([3,2])
 
-# LOGO (más grande)
 with col1:
-    st.image("Logo.jpg", width=150)
+    st.image("https://raw.githubusercontent.com/ManuelG-Prog/casino-demo/principal/Logo.jpg", width=140)
 
-# DERECHA (saldo + botones)
 with col2:
-    c1, c2, c3 = st.columns([2,2,1])
+    c1, c2, c3 = st.columns([1,1,1])
 
-    # BOTÓN DEPOSITAR
     with c1:
-        st.markdown('<div class="deposit-btn">', unsafe_allow_html=True)
         if st.button("💳 Depositar"):
-            st.session_state.page = "depositos"
-        st.markdown('</div>', unsafe_allow_html=True)
+            depositar()
 
-    # SALDO
     with c2:
         st.markdown(f"""
-        <div class="balance-box">
-        ${st.session_state.saldo}
+        <div class="balance">
+            ${st.session_state.saldo}
         </div>
         """, unsafe_allow_html=True)
 
-    # BOTÓN USUARIO
     with c3:
-        if st.button("👤"):
-            st.session_state.menu = not st.session_state.menu
+        with st.popover("👤"):
+            st.write("💸 Retiros")
+            st.write("📥 Depósitos")
+            st.write("💬 Mensajes")
+            st.write("🚪 Cerrar sesión")
 
-# ---------------- MENÚ ----------------
-if st.session_state.menu:
-    st.markdown("""
-    <div class="menu-box">
-        <div>💸 Retiros</div>
-        <div>📥 Depósitos</div>
-        <div>💬 Mensajes</div>
-        <div>🚪 Cerrar sesión</div>
-    </div>
-    """, unsafe_allow_html=True)
+# -----------------------------
+# BANNER
+# -----------------------------
+st.image("https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=1200", use_container_width=True)
 
-# ---------------- PANTALLAS ----------------
+# -----------------------------
+# CATEGORÍAS
+# -----------------------------
+st.write("")
+c1, c2, c3, c4 = st.columns(4)
 
-# 🏠 INICIO
-if st.session_state.page == "inicio":
+c1.button("🔍 Buscar")
+c2.button("🏠 Hogar")
+c3.button("🆕 Nuevo")
+c4.button("🎰 Slots")
 
-    st.image(
-        "https://images.unsplash.com/photo-1601597111158-2fceff292cdc?w=1200",
-        use_container_width=True
-    )
+# -----------------------------
+# JUEGOS
+# -----------------------------
+st.markdown('<div class="title">🎰 Sigue Jugando</div>', unsafe_allow_html=True)
 
-    st.markdown("## 🎰 Sigue Jugando")
+col1, col2, col3 = st.columns(3)
 
-    cols = st.columns(4)
+with col1:
+    st.image("https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=400")
+    if st.button("JUGAR $10", key="g1"):
+        jugar(10)
 
-    for i, col in enumerate(cols):
-        with col:
-            st.image(f"https://picsum.photos/20{i}")
+with col2:
+    st.image("https://images.unsplash.com/photo-1596838132731-3301c3fd4317?w=400")
+    if st.button("JUGAR $20", key="g2"):
+        jugar(20)
 
-            costo = 10
-
-            if st.button(f"JUGAR ${costo}", key=f"play{i}"):
-
-                if st.session_state.saldo >= costo:
-                    st.session_state.saldo -= costo
-                    st.success(f"Jugaste y gastaste ${costo}")
-                else:
-                    st.error("Saldo insuficiente")
-
-# 💳 DEPÓSITOS
-elif st.session_state.page == "depositos":
-
-    st.markdown("## 💳 Depósitos")
-
-    monto = st.number_input("Monto a agregar", min_value=1)
-
-    if st.button("Agregar fondos"):
-        st.session_state.saldo += monto
-        st.success(f"Se agregaron ${monto}")
-
-    if st.button("⬅ Volver"):
-        st.session_state.page = "inicio"
-
-# ---------------- FOOTER ----------------
-st.markdown("""
-<div style="
-position:fixed;
-bottom:0;
-width:100%;
-background:#1a232e;
-display:flex;
-justify-content:space-around;
-padding:10px;
-font-size:12px;
-">
-<div>🏠 Inicio</div>
-<div>💳 Deposita</div>
-<div>🎰 Slots</div>
-<div>☰ Menú</div>
-</div>
-""", unsafe_allow_html=True)
+with col3:
+    st.image("https://images.unsplash.com/photo-1607082350899-7e105aa886ae?w=400")
+    if st.button("JUGAR $50", key="g3"):
+        jugar(50)

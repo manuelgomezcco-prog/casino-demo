@@ -4,24 +4,49 @@ import time
 
 # 1. CONFIGURACIÓN DE LA PÁGINA
 st.set_page_config(
-    page_title="Fortuna MX - Casino Online",
-    page_icon="🎰",
+    page_title="Fortuna MX - Elite Gaming",
+    page_icon="🍀",
     layout="wide"
 )
 
-# Estilo personalizado para el título dorado
+# 2. ESTILOS CSS PARA UNA INTERFAZ "PREMIUM"
 st.markdown("""
     <style>
-    .gold-text {
+    /* Fondo general oscuro */
+    .stApp {
+        background-color: #0e1117;
+    }
+    /* Estilo para las tarjetas de juegos */
+    .game-card {
+        background-color: #1f2630;
+        border-radius: 15px;
+        padding: 10px;
+        border: 1px solid #D4AF37;
+        transition: transform .2s;
+    }
+    .game-card:hover {
+        transform: scale(1.02);
+    }
+    .gold-title {
         color: #D4AF37;
         text-align: center;
         font-family: 'Serif';
+        font-weight: bold;
+        font-size: 42px;
+        margin-bottom: 0px;
+    }
+    .balance-box {
+        background-color: #D4AF37;
+        color: black;
+        padding: 10px;
+        border-radius: 10px;
+        text-align: center;
         font-weight: bold;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. INICIALIZACIÓN DE DATOS (Simulando base de datos)
+# 3. DATOS (Simulación de DB)
 if 'saldo' not in st.session_state:
     st.session_state.saldo = 5000.0
 if 'ggr' not in st.session_state:
@@ -29,86 +54,73 @@ if 'ggr' not in st.session_state:
 if 'logs' not in st.session_state:
     st.session_state.logs = []
 
-# --- NAVEGACIÓN LATERAL ---
-st.sidebar.title("♣️ FORTUNA MX")
-pagina = st.sidebar.radio("Menú Principal", ["Lobby del Jugador", "Panel de Control (Admin)"])
+# --- NAVEGACIÓN ---
+st.sidebar.markdown("<h2 style='color: #D4AF37;'>♣️ FORTUNA MX</h2>", unsafe_allow_html=True)
+pagina = st.sidebar.radio("Navegación", ["🎰 Lobby de Juegos", "💰 Cajero / Depósitos", "📊 Admin Panel"])
 
-# --- LÓGICA DEL LOBBY DEL JUGADOR ---
-if pagina == "Lobby del Jugador":
-    # Encabezado con Logo y Título
+# --- LÓGICA DEL LOBBY ---
+if pagina == "🎰 Lobby de Juegos":
+    # Header centrado
     col_a, col_b, col_c = st.columns([1, 2, 1])
     with col_b:
-        # Aquí usamos la URL de la imagen del trébol dorado
         st.image("https://r.jina.ai/i/9e0e5a8f6d3c4b2a8e1d2f3a4b5c6d7e", use_container_width=True)
-        st.markdown("<h1 class='gold-text'>FORTUNA MX</h1>", unsafe_allow_html=True)
+        st.markdown("<h1 class='gold-title'>FORTUNA MX</h1>", unsafe_allow_html=True)
     
     st.divider()
 
-    # Fila de Saldo
-    c_inv, c_saldo = st.columns([3, 1])
-    with c_saldo:
-        st.metric("Tu Billetera", f"${st.session_state.saldo:,.2f} MXN")
+    # Saldo en una posición fija
+    c_inf, c_sal = st.columns([4, 1])
+    with c_sal:
+        st.markdown(f"<div class='balance-box'>SALDO: ${st.session_state.saldo:,.2f} MXN</div>", unsafe_allow_html=True)
 
-    st.subheader("🎰 Juegos Populares")
+    st.markdown("### 🔥 Juegos más populares")
     
-    # Grid de juegos con diseño mejorado
+    # Definición de juegos con imágenes reales
     juegos = [
-        {"nombre": "Sweet Bonanza", "prov": "Pragmatic"},
-        {"nombre": "Lightning Roulette", "prov": "Evolution"},
-        {"nombre": "Blackjack VIP", "prov": "Evolution"},
-        {"nombre": "Gates of Olympus", "prov": "Pragmatic"}
+        {"nombre": "Sweet Bonanza", "img": "https://images.ctfassets.net/69mcl89p8l6v/7d2fEof2C0y6yOQUy6e2Yy/719f9f592d3e4f0d8a5a5a5a5a5a5a5a/sweet-bonanza.jpg", "prov": "Pragmatic"},
+        {"nombre": "Gates of Olympus", "img": "https://images.ctfassets.net/69mcl89p8l6v/5P6p7o8n9m0l1k2j3i4h5g/9a8b7c6d5e4f3g2h1i0j9k8l7m6n5o4p/gates-of-olympus.jpg", "prov": "Pragmatic"},
+        {"nombre": "Lightning Roulette", "img": "https://www.evolution.com/sites/default/files/styles/game_thumbnail/public/game-thumbnails/lightning-roulette.jpg", "prov": "Evolution"},
+        {"nombre": "Blackjack Live", "img": "https://www.evolution.com/sites/default/files/styles/game_thumbnail/public/game-thumbnails/blackjack.jpg", "prov": "Evolution"}
     ]
-    
+
+    # Grid de juegos en columnas
     cols = st.columns(2)
     for idx, juego in enumerate(juegos):
         with cols[idx % 2]:
-            with st.container(border=True):
-                st.write(f"### {juego['nombre']}")
-                st.caption(f"Proveedor: {juego['prov']}")
-                if st.button(f"Jugar $50.00", key=f"juego_{idx}", use_container_width=True):
+            with st.container():
+                # Simulación de tarjeta visual
+                st.image(juego["img"], use_container_width=True, caption=f"By {juego['prov']}")
+                st.write(f"**{juego['nombre']}**")
+                if st.button(f"JUGAR AHORA", key=f"play_{idx}", use_container_width=True):
                     if st.session_state.saldo >= 50:
                         st.session_state.saldo -= 50
-                        # Simulación: El casino retiene un margen (GGR)
-                        st.session_state.ggr += 5.0 
-                        st.session_state.logs.insert(0, {
-                            "Hora": time.strftime("%H:%M:%S"), 
-                            "Evento": f"Apuesta: {juego['nombre']}", 
-                            "Monto": "-$50.00"
-                        })
-                        st.toast(f"¡Girando en {juego['nombre']}!")
-                        time.sleep(0.5)
+                        st.session_state.ggr += 5.0
+                        st.session_state.logs.insert(0, {"Hora": time.strftime("%H:%M:%S"), "Evento": f"Jugó {juego['nombre']}", "Monto": "-$50.00"})
+                        st.balloons()
+                        st.toast(f"Abriendo {juego['nombre']}...")
+                        time.sleep(1)
                         st.rerun()
                     else:
-                        st.error("Saldo insuficiente. Por favor recarga.")
+                        st.error("❌ Saldo insuficiente")
 
-# --- LÓGICA DEL PANEL DE ADMINISTRACIÓN ---
+# --- CAJERO (Nuevo) ---
+elif pagina == "💰 Cajero / Depósitos":
+    st.markdown("<h2 class='gold-title'>CAJERO</h2>", unsafe_allow_html=True)
+    st.write("Recarga tu cuenta para seguir jugando.")
+    
+    monto_recarga = st.number_input("Monto a depositar (MXN)", min_value=100, step=100)
+    metodo = st.selectbox("Método de Pago", ["SPEI (Transferencia)", "OXXO Pay", "Tarjeta Bancaria"])
+    
+    if st.button("PROCESAR DEPÓSITO", use_container_width=True):
+        with st.spinner("Conectando con pasarela de pago..."):
+            time.sleep(2)
+            st.session_state.saldo += monto_recarga
+            st.success(f"¡Depósito de ${monto_recarga} MXN exitoso!")
+            st.rerun()
+
+# --- ADMIN PANEL ---
 else:
-    st.title("📊 Administración de Fortuna MX")
-    
-    # Métricas de Negocio
-    m1, m2, m3 = st.columns(3)
-    m1.metric("GGR (Utilidad Casa)", f"${st.session_state.ggr:,.2f} MXN", delta="Ganancia real")
-    m2.metric("Jugadores en línea", "1", delta="Activo ahora")
-    m3.metric("Estado de Red", "Excelente", delta="Ping: 45ms")
-    
-    st.divider()
-    
-    col_config, col_trans = st.columns([1, 1])
-    
-    with col_config:
-        st.subheader("🔧 Conexión con Agregadores")
-        agregador = st.selectbox("Seleccionar HUB", ["Slotegrator", "SoftGamings", "EveryMatrix"])
-        st.text_input("Llave Privada (Production Key)", type="password", value="FORTUNA_MX_SECURE_KEY")
-        if st.button("Verificar Sincronización"):
-            st.success(f"Sincronizado con {agregador}. 1,200+ juegos listos.")
-            
-    with col_trans:
-        st.subheader("📝 Auditoría de Apuestas")
-        if st.session_state.logs:
-            st.dataframe(pd.DataFrame(st.session_state.logs), use_container_width=True)
-        else:
-            st.info("Sin transacciones en esta sesión.")
-
-# --- FOOTER ---
-st.sidebar.divider()
-st.sidebar.caption("© 2026 Fortuna MX | Proyecto Confidencial")
+    st.title("📊 Control Administrativo")
+    st.metric("GGR Acumulado (Revenue)", f"${st.session_state.ggr:,.2f} MXN")
+    st.write("### Historial de Movimientos")
+    st.dataframe(pd.DataFrame(st.session_state.logs), use_container_width=True)

@@ -10,6 +10,9 @@ if "menu" not in st.session_state:
 if "page" not in st.session_state:
     st.session_state.page = "inicio"
 
+if "saldo" not in st.session_state:
+    st.session_state.saldo = 100  # saldo inicial ficticio
+
 # ---------------- CSS ----------------
 st.markdown("""
 <style>
@@ -28,37 +31,50 @@ header {display:none;}
     width: 180px;
 }
 
-.menu-box div {
-    padding: 8px;
-    cursor: pointer;
+.deposit-btn button {
+    background-color: #28a745 !important;
+    color: white !important;
+    font-weight: bold;
+    border-radius: 6px;
 }
 
-.menu-box div:hover {
-    background: #2c3a4d;
-    border-radius: 6px;
+.balance-box {
+    background:#2c3a4d;
+    padding:6px;
+    border-radius:6px;
+    text-align:center;
+    font-size:11px;
 }
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------- HEADER ----------------
-col1, col2, col3 = st.columns([2,5,3])
+col1, col2 = st.columns([6,4])
 
+# LOGO (más grande)
 with col1:
-    st.image("Logo.jpg", width=90)
+    st.image("Logo.jpg", width=150)
 
-with col3:
+# DERECHA (saldo + botones)
+with col2:
     c1, c2, c3 = st.columns([2,2,1])
 
+    # BOTÓN DEPOSITAR
     with c1:
-        if st.button("💳 Deposita"):
+        st.markdown('<div class="deposit-btn">', unsafe_allow_html=True)
+        if st.button("💳 Depositar"):
             st.session_state.page = "depositos"
+        st.markdown('</div>', unsafe_allow_html=True)
 
+    # SALDO
     with c2:
-        st.markdown(
-            '<div style="background:#2c3a4d;padding:8px;border-radius:6px;text-align:center;">$0.32</div>',
-            unsafe_allow_html=True
-        )
+        st.markdown(f"""
+        <div class="balance-box">
+        ${st.session_state.saldo}
+        </div>
+        """, unsafe_allow_html=True)
 
+    # BOTÓN USUARIO
     with c3:
         if st.button("👤"):
             st.session_state.menu = not st.session_state.menu
@@ -67,10 +83,10 @@ with col3:
 if st.session_state.menu:
     st.markdown("""
     <div class="menu-box">
-        <div onclick="window.location.reload()">💸 Retiros</div>
-        <div onclick="window.location.reload()">📥 Depósitos</div>
-        <div onclick="window.location.reload()">💬 Mensajes</div>
-        <div onclick="window.location.reload()">🚪 Cerrar sesión</div>
+        <div>💸 Retiros</div>
+        <div>📥 Depósitos</div>
+        <div>💬 Mensajes</div>
+        <div>🚪 Cerrar sesión</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -91,43 +107,27 @@ if st.session_state.page == "inicio":
     for i, col in enumerate(cols):
         with col:
             st.image(f"https://picsum.photos/20{i}")
-            if st.button("JUGAR", key=f"play{i}"):
-                st.session_state.page = "juego"
+
+            costo = 10
+
+            if st.button(f"JUGAR ${costo}", key=f"play{i}"):
+
+                if st.session_state.saldo >= costo:
+                    st.session_state.saldo -= costo
+                    st.success(f"Jugaste y gastaste ${costo}")
+                else:
+                    st.error("Saldo insuficiente")
 
 # 💳 DEPÓSITOS
 elif st.session_state.page == "depositos":
 
     st.markdown("## 💳 Depósitos")
 
-    monto = st.number_input("Monto", min_value=1)
+    monto = st.number_input("Monto a agregar", min_value=1)
 
-    metodo = st.selectbox("Método", ["Tarjeta", "Transferencia", "Crypto"])
-
-    if st.button("Confirmar depósito"):
-        st.success(f"Depósito de ${monto} realizado")
-
-    if st.button("⬅ Volver"):
-        st.session_state.page = "inicio"
-
-# 💸 RETIROS
-elif st.session_state.page == "retiros":
-
-    st.markdown("## 💸 Retiros")
-
-    monto = st.number_input("Monto a retirar", min_value=1)
-
-    if st.button("Solicitar retiro"):
-        st.success(f"Retiro de ${monto} solicitado")
-
-    if st.button("⬅ Volver"):
-        st.session_state.page = "inicio"
-
-# 🎮 JUEGO
-elif st.session_state.page == "juego":
-
-    st.markdown("## 🎮 Juego en curso")
-
-    st.image("https://picsum.photos/600")
+    if st.button("Agregar fondos"):
+        st.session_state.saldo += monto
+        st.success(f"Se agregaron ${monto}")
 
     if st.button("⬅ Volver"):
         st.session_state.page = "inicio"
@@ -142,6 +142,7 @@ background:#1a232e;
 display:flex;
 justify-content:space-around;
 padding:10px;
+font-size:12px;
 ">
 <div>🏠 Inicio</div>
 <div>💳 Deposita</div>

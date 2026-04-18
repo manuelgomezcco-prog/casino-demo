@@ -1,192 +1,135 @@
 import streamlit as st
 import base64
 import requests
-from io import BytesIO
 
-# 1. CONFIGURACIÓN DE LA PÁGINA
-st.set_page_config(
-    page_title="Fortuna MX",
-    page_icon="🍀",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+# 1. CONFIGURACIÓN
+st.set_page_config(page_title="Fortuna MX", layout="wide", initial_sidebar_state="collapsed")
 
-# 2. FUNCIÓN PARA CARGAR EL LOGO (SOLUCIÓN DEFINITIVA)
+# 2. FUNCIÓN ANTI-BLOQUEO (Usando Proxy de imágenes)
+@st.cache_data
 def get_base64_img(url):
+    # Usamos un proxy de imágenes para saltar el bloqueo de GitHub
+    proxy_url = f"https://images.weserv.nl/?url={url.replace('https://', '')}"
     try:
-        response = requests.get(url)
-        return base64.b64encode(response.content).decode()
-    except:
+        response = requests.get(proxy_url, timeout=10)
+        if response.status_code == 200:
+            return base64.b64encode(response.content).decode()
+    except Exception as e:
         return ""
+    return ""
 
-# URL de tu logo en GitHub
-url_logo = "https://raw.githubusercontent.com/ManuelG-Prog/casino-demo/principal/logo.PNG"
-logo_base64 = get_base64_img(url_logo)
+# URL corregida de tu logo
+url_logo = "raw.githubusercontent.com/ManuelG-Prog/casino-demo/principal/logo.PNG"
+logo_data = get_base64_img(url_logo)
 
-# 3. CSS DE ALTA FIDELIDAD (Estilo Winpot)
+# 3. CSS PROFESIONAL
 st.markdown(f"""
     <style>
-    /* Fondo y Reset General */
     .stApp {{ background-color: #0b0e11; }}
     [data-testid="stHeader"] {{display: none;}}
     header {{visibility: hidden;}}
     
-    /* HEADER FIJO */
     .custom-header {{
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 5px 20px;
+        padding: 5px 15px;
         background-color: #1a1f26;
         position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 9999;
+        top: 0; left: 0; right: 0;
+        z-index: 99999;
         height: 65px;
         border-bottom: 1px solid #2d343f;
     }}
 
-    /* Estilo del Logotipo */
-    .logo-container img {{
-        max-height: 45px;
-        width: auto;
-        display: block;
+    /* Contenedor del Logo */
+    .logo-box {{
+        display: flex;
+        align-items: center;
+        min-width: 120px;
     }}
 
-    /* Contenedor de Acciones (Botón y Saldo) */
+    .logo-box img {{
+        max-height: 45px;
+        width: auto;
+        filter: drop-shadow(0px 0px 2px rgba(255,255,255,0.2));
+    }}
+
     .user-actions {{
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
     }}
 
     .deposit-btn {{
         background-color: #76b82a;
         color: #000 !important;
-        padding: 8px 16px;
-        border-radius: 8px;
+        padding: 8px 12px;
+        border-radius: 6px;
         font-weight: bold;
-        font-size: 14px;
+        font-size: 13px;
         text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 6px;
     }}
 
     .balance-badge {{
         background-color: #2d343f;
         color: #fff;
-        padding: 8px 12px;
-        border-radius: 8px;
+        padding: 8px 10px;
+        border-radius: 6px;
         font-weight: bold;
-        font-size: 14px;
+        font-size: 13px;
         border: 1px solid #3e4652;
-        font-family: 'Roboto', sans-serif;
     }}
 
-    /* BANNER Y CONTENIDO */
-    .main-wrapper {{
-        margin-top: 85px; /* Espacio para que no choque con el header */
-    }}
-
-    .banner-img {{
-        width: 100%;
-        border-radius: 15px;
-        margin-bottom: 25px;
-    }}
-
+    .main-content {{ margin-top: 85px; }}
+    
     .section-title {{
-        color: #ffffff;
+        color: white;
         font-size: 16px;
         font-weight: bold;
-        margin-bottom: 15px;
+        margin: 20px 0;
         text-transform: uppercase;
-        letter-spacing: 1px;
-    }}
-
-    /* Ajuste de botones de juego nativos de Streamlit */
-    .stButton > button {{
-        background-color: #1a1f26 !important;
-        color: white !important;
-        border: 1px solid #3e4652 !important;
-        font-weight: bold !important;
-        width: 100%;
-    }}
-    
-    .stButton > button:hover {{
-        border-color: #76b82a !important;
-        color: #76b82a !important;
-    }}
-
-    /* MENÚ INFERIOR MÓVIL */
-    .bottom-nav {{
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: #1a1f26;
-        display: flex;
-        justify-content: space-around;
-        padding: 12px 0;
-        border-top: 1px solid #2d343f;
-        z-index: 9999;
-    }}
-
-    .nav-item {{
-        text-align: center;
-        color: #8a96a3;
-        font-size: 11px;
-        text-decoration: none;
     }}
     </style>
 
     <div class="custom-header">
-        <div class="logo-container">
-            <img src="data:image/png;base64,{logo_base64}" alt="Fortuna MX">
+        <div class="logo-box">
+            <img src="data:image/png;base64,{logo_data}" onerror="this.src='https://via.placeholder.com/150x50?text=Fortuna+MX'">
         </div>
         <div class="user-actions">
             <a class="deposit-btn">📥 Depositar</a>
             <div class="balance-badge">$ 5,000.00</div>
-            <div style="color: #8a96a3; font-size: 24px; cursor: pointer;">👤</div>
+            <div style="color: #8a96a3; font-size: 24px;">👤</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-# 4. CONTENIDO DE LA APLICACIÓN
-st.markdown('<div class="main-wrapper">', unsafe_allow_html=True)
+# 4. CONTENIDO
+st.markdown('<div class="main-content">', unsafe_allow_html=True)
 
-# Banner Principal
-st.markdown('<img src="https://images.unsplash.com/photo-1518623489648-a173ef7824f3?w=1200" class="banner-img">', unsafe_allow_html=True)
+# Banner
+st.image("https://images.unsplash.com/photo-1518623489648-a173ef7824f3?w=1200", use_container_width=True)
 
-# Sección de Juegos
 st.markdown('<div class="section-title">Sigue Jugando</div>', unsafe_allow_html=True)
 
-# Cuadrícula de 2 columnas para móvil (se ve mejor)
-col1, col2 = st.columns(2)
-img_juego = "https://images.unsplash.com/photo-1596711762462-850f28584813?w=400"
+# Rejilla limpia de 2 columnas
+c1, c2 = st.columns(2)
+with c1:
+    st.image("https://images.unsplash.com/photo-1596711762462-850f28584813?w=400", use_container_width=True)
+    st.button("JUGAR", key="g1", use_container_width=True)
+with c2:
+    st.image("https://images.unsplash.com/photo-1596711762462-850f28584813?w=400", use_container_width=True)
+    st.button("JUGAR", key="g2", use_container_width=True)
 
-with col1:
-    st.image(img_juego, use_container_width=True)
-    st.button("JUGAR", key="game_1")
+st.markdown('</div>', unsafe_allow_html=True)
 
-with col2:
-    st.image(img_juego, use_container_width=True)
-    st.button("JUGAR", key="game_2")
-
-st.markdown('</div>', unsafe_allow_html=True) # Cierre de main-wrapper
-
-# 5. MENÚ INFERIOR (Visual)
+# 5. MENÚ INFERIOR
 st.markdown("""
-    <div class="bottom-nav">
-        <a class="nav-item">🏠<br>Inicio</a>
-        <a class="nav-item" style="color: #76b82a;">📥<br>Depositar</a>
-        <a class="nav-item">🎰<br>Slots</a>
-        <a class="nav-item">☰<br>Menú</a>
+    <div style="position: fixed; bottom: 0; left: 0; right: 0; background: #1a1f26; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #2d343f; z-index: 99999;">
+        <div style="text-align: center; color: white; font-size: 11px;">🏠<br>Inicio</div>
+        <div style="text-align: center; color: #76b82a; font-size: 11px;">📥<br>Depositar</div>
+        <div style="text-align: center; color: white; font-size: 11px;">🎰<br>Slots</div>
+        <div style="text-align: center; color: white; font-size: 11px;">☰<br>Menú</div>
     </div>
-    <div style="height: 80px;"></div>
+    <div style="height: 70px;"></div>
     """, unsafe_allow_html=True)
-
-# 6. LÓGICA DE BOTONES (OPCIONAL)
-if st.session_state.get('game_1'):
-    st.toast("Cargando juego...")

@@ -2,10 +2,26 @@ import streamlit as st
 import pandas as pd
 import time
 
-# Configuración inicial
-st.set_page_config(page_title="Casino Pro", layout="wide")
+# 1. CONFIGURACIÓN DE LA PÁGINA
+st.set_page_config(
+    page_title="Fortuna MX - Casino Online",
+    page_icon="🎰",
+    layout="wide"
+)
 
-# Inicialización de datos (Simulando una base de datos)
+# Estilo personalizado para el título dorado
+st.markdown("""
+    <style>
+    .gold-text {
+        color: #D4AF37;
+        text-align: center;
+        font-family: 'Serif';
+        font-weight: bold;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# 2. INICIALIZACIÓN DE DATOS (Simulando base de datos)
 if 'saldo' not in st.session_state:
     st.session_state.saldo = 5000.0
 if 'ggr' not in st.session_state:
@@ -13,62 +29,86 @@ if 'ggr' not in st.session_state:
 if 'logs' not in st.session_state:
     st.session_state.logs = []
 
-# --- NAVEGACIÓN ---
-st.sidebar.title("Navegación")
-pagina = st.sidebar.radio("Ir a:", ["Lobby del Jugador", "Panel de Control (Admin)"])
+# --- NAVEGACIÓN LATERAL ---
+st.sidebar.title("♣️ FORTUNA MX")
+pagina = st.sidebar.radio("Menú Principal", ["Lobby del Jugador", "Panel de Control (Admin)"])
 
 # --- LÓGICA DEL LOBBY DEL JUGADOR ---
 if pagina == "Lobby del Jugador":
-    col_l, col_r = st.columns([3, 1])
-    with col_l:
-        st.title("🎰 Bienvenido al Casino")
-    with col_r:
-        st.metric("Tu Saldo", f"${st.session_state.saldo:,.2f} MXN")
-
-    st.subheader("Juegos Destacados")
+    # Encabezado con Logo y Título
+    col_a, col_b, col_c = st.columns([1, 2, 1])
+    with col_b:
+        # Aquí usamos la URL de la imagen del trébol dorado
+        st.image("https://r.jina.ai/i/9e0e5a8f6d3c4b2a8e1d2f3a4b5c6d7e", use_container_width=True)
+        st.markdown("<h1 class='gold-text'>FORTUNA MX</h1>", unsafe_allow_html=True)
     
-    # Grid de juegos
+    st.divider()
+
+    # Fila de Saldo
+    c_inv, c_saldo = st.columns([3, 1])
+    with c_saldo:
+        st.metric("Tu Billetera", f"${st.session_state.saldo:,.2f} MXN")
+
+    st.subheader("🎰 Juegos Populares")
+    
+    # Grid de juegos con diseño mejorado
     juegos = [
-        {"nombre": "Sweet Bonanza", "color": "#FF5733"},
-        {"nombre": "Lightning Roulette", "color": "#FFD700"},
-        {"nombre": "Blackjack Live", "color": "#006400"},
-        {"nombre": "Gates of Olympus", "color": "#4B0082"}
+        {"nombre": "Sweet Bonanza", "prov": "Pragmatic"},
+        {"nombre": "Lightning Roulette", "prov": "Evolution"},
+        {"nombre": "Blackjack VIP", "prov": "Evolution"},
+        {"nombre": "Gates of Olympus", "prov": "Pragmatic"}
     ]
     
     cols = st.columns(2)
     for idx, juego in enumerate(juegos):
         with cols[idx % 2]:
-            st.info(f"### {juego['nombre']}")
-            if st.button(f"Apostar $50 en {juego['nombre']}", key=f"btn_{idx}"):
-                if st.session_state.saldo >= 50:
-                    st.session_state.saldo -= 50
-                    # Simulamos que la casa gana el 10% (GGR)
-                    st.session_state.ggr += 50 * 0.10
-                    st.session_state.logs.insert(0, {"Hora": time.strftime("%H:%M:%S"), "Evento": f"Apuesta en {juego['nombre']}", "Monto": "-$50"})
-                    st.success("¡Suerte! Procesando apuesta...")
-                    time.sleep(1)
-                    st.rerun()
-                else:
-                    st.error("Saldo insuficiente")
+            with st.container(border=True):
+                st.write(f"### {juego['nombre']}")
+                st.caption(f"Proveedor: {juego['prov']}")
+                if st.button(f"Jugar $50.00", key=f"juego_{idx}", use_container_width=True):
+                    if st.session_state.saldo >= 50:
+                        st.session_state.saldo -= 50
+                        # Simulación: El casino retiene un margen (GGR)
+                        st.session_state.ggr += 5.0 
+                        st.session_state.logs.insert(0, {
+                            "Hora": time.strftime("%H:%M:%S"), 
+                            "Evento": f"Apuesta: {juego['nombre']}", 
+                            "Monto": "-$50.00"
+                        })
+                        st.toast(f"¡Girando en {juego['nombre']}!")
+                        time.sleep(0.5)
+                        st.rerun()
+                    else:
+                        st.error("Saldo insuficiente. Por favor recarga.")
 
 # --- LÓGICA DEL PANEL DE ADMINISTRACIÓN ---
 else:
-    st.title("📊 Panel de Control Administrativo")
+    st.title("📊 Administración de Fortuna MX")
     
-    c1, c2, c3 = st.columns(3)
-    c1.metric("GGR (Ganancia Casa)", f"${st.session_state.ggr:,.2f} MXN")
-    c2.metric("Usuarios Activos", "1")
-    c3.metric("Status API", "🟢 Conectado")
+    # Métricas de Negocio
+    m1, m2, m3 = st.columns(3)
+    m1.metric("GGR (Utilidad Casa)", f"${st.session_state.ggr:,.2f} MXN", delta="Ganancia real")
+    m2.metric("Jugadores en línea", "1", delta="Activo ahora")
+    m3.metric("Estado de Red", "Excelente", delta="Ping: 45ms")
     
-    st.subheader("Configuración de Proveedores")
-    prov = st.selectbox("Proveedor", ["Pragmatic Play", "Evolution Gaming"])
-    st.text_input("API Key", type="password", value="demo_key_12345")
+    st.divider()
     
-    if st.button("Probar Conexión"):
-        st.toast("Sincronizando con el servidor del proveedor...")
-        
-    st.subheader("Historial de Transacciones en Vivo")
-    if st.session_state.logs:
-        st.table(pd.DataFrame(st.session_state.logs))
-    else:
-        st.write("No hay transacciones recientes.")
+    col_config, col_trans = st.columns([1, 1])
+    
+    with col_config:
+        st.subheader("🔧 Conexión con Agregadores")
+        agregador = st.selectbox("Seleccionar HUB", ["Slotegrator", "SoftGamings", "EveryMatrix"])
+        st.text_input("Llave Privada (Production Key)", type="password", value="FORTUNA_MX_SECURE_KEY")
+        if st.button("Verificar Sincronización"):
+            st.success(f"Sincronizado con {agregador}. 1,200+ juegos listos.")
+            
+    with col_trans:
+        st.subheader("📝 Auditoría de Apuestas")
+        if st.session_state.logs:
+            st.dataframe(pd.DataFrame(st.session_state.logs), use_container_width=True)
+        else:
+            st.info("Sin transacciones en esta sesión.")
+
+# --- FOOTER ---
+st.sidebar.divider()
+st.sidebar.caption("© 2026 Fortuna MX | Proyecto Confidencial")

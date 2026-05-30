@@ -3,29 +3,22 @@ import random
 import time
 import base64
 import os
+import json
 
-# Intentamos importar las librerías oficiales necesarias
+# Intentamos importar la librería oficial de Stripe
 try:
     import stripe
 except ImportError:
-    st.error("Por favor, añade 'stripe' a tu archivo requirements.txt en tu repositorio.")
+    st.error("La librería 'stripe' no está instalada. Agrégala a tu archivo requirements.txt.")
 
-# Para conectar Firebase Firestore de forma nativa en Python de manera simplificada,
-# utilizaremos las variables de entorno seguras de Streamlit.
-# Para evitar dependencias Firebase pesadas de C++ en Streamlit Cloud que a veces fallan al compilar,
-# emularemos un sistema seguro de base de datos en nube persistente a través del SDK o bien utilizando 
-# st.session_state con respaldo estructurado.
-# Para garantizar la máxima estabilidad de compilación en el servidor de Streamlit de tu móvil,
-# usaremos una base de datos local JSON persistente en el disco del contenedor de la app,
-# la cual mantiene los datos persistentes de todos los usuarios registrados, sus saldos, CLABEs y teléfonos.
+# Configuración de página móvil premium
+st.set_page_config(layout="wide", page_title="Fortuna MX - Casino", page_icon="🎰")
 
-import json
-
+# ---------------- BASE DE DATOS PERSISTENTE LOCAL ----------------
 DB_FILE = "usuarios_db.json"
 
 def cargar_base_datos():
     if not os.path.exists(DB_FILE):
-        # Base de datos inicial con un administrador preconfigurado
         inicial = {
             "admin@fortunamx.com": {
                 "nombre": "Administrador Fortuna",
@@ -54,11 +47,7 @@ def guardar_base_datos(db):
     except Exception as e:
         st.error(f"Error al escribir en la base de datos: {e}")
 
-# Inicializamos la base de datos de usuarios
 usuarios_db = cargar_base_datos()
-
-# Configuración de página móvil premium
-st.set_page_config(layout="wide", page_title="Fortuna MX - Casino", page_icon="🎰")
 
 # ---------------- CONFIGURACIÓN DE STRIPE ----------------
 STRIPE_SECRET_KEY = st.secrets.get("STRIPE_SECRET_KEY", "sk_test_51OpEXAMPLE_KEY_OBLIGATORIA_DE_STRIPE")
@@ -66,12 +55,16 @@ stripe.api_key = STRIPE_SECRET_KEY
 APP_URL = "https://fortuna-mx.streamlit.app" 
 ADMIN_PASSWORD = st.secrets.get("ADMIN_PASSWORD", "FortunaAdmin2026")
 
-# ---------------- PERSISTENCIA DEL USUARIO ACTIVO ----------------
+# ---------------- PERSISTENCIA DE SESIÓN ----------------
 if "usuario_conectado" not in st.session_state:
-    st.session_state.usuario_conectado = None  # Almacena el correo del usuario logueado
+    st.session_state.usuario_conectado = None
 
 if "pagos_verificados" not in st.session_state:
     st.session_state.pagos_verificados = set()
+
+# Sistema de disparo de animación del Slot
+if "slot_resultado" not in st.session_state:
+    st.session_state.slot_resultado = None
 
 # --- VERIFICACIÓN AUTOMÁTICA DE DEPÓSITOS DE STRIPE ---
 query_params = st.query_params
@@ -83,16 +76,12 @@ if "session_id" in query_params and st.session_state.usuario_conectado:
     if session_id not in st.session_state.pagos_verificados:
         try:
             checkout_session = stripe.checkout.Session.retrieve(session_id)
-            
             if checkout_session.payment_status == "paid":
-                monto_real = checkout_session.amount_total / 100.0  # Stripe procesa en centavos
+                monto_real = checkout_session.amount_total / 100.0
                 
-                # Actualizar saldo en la base de datos persistente
                 usuarios_db = cargar_base_datos()
                 if correo in usuarios_db:
                     usuarios_db[correo]["saldo"] += monto_real
-                    
-                    # Registrar en el historial persistente del usuario
                     usuarios_db[correo]["historial"].append({
                         "fecha": time.strftime("%Y-%m-%d %H:%M:%S"),
                         "tipo": "Depósito Real Stripe",
@@ -102,8 +91,7 @@ if "session_id" in query_params and st.session_state.usuario_conectado:
                     })
                     guardar_base_datos(usuarios_db)
                     st.session_state.pagos_verificados.add(session_id)
-                    
-                    st.success(f"🎉 ¡Depósito verificado! Se han acreditado ${monto_real:,.2f} MXN a tu cuenta de {usuarios_db[correo]['nombre']}.")
+                    st.success(f"🎉 ¡Depósito verificado! Se han acreditado ${monto_real:,.2f} MXN.")
                     st.balloons()
                 
                 st.query_params.clear()
@@ -112,7 +100,7 @@ if "session_id" in query_params and st.session_state.usuario_conectado:
         except Exception as e:
             st.error(f"Error en la verificación del pago de Stripe: {e}")
 
-# ---------------- FUNCIÓN DE LOGOTIPO RESPONSIVO ----------------
+# ---------------- ENCODE LOGO ----------------
 def obtener_logo_base64():
     formatos = ["Logo.jpg", "logo.jpg", "Logo.png", "logo.png"]
     for nombre in formatos:
@@ -133,37 +121,24 @@ logo_base64 = obtener_logo_base64()
 st.markdown("""
 <style>
 /* Ocultar elementos nativos de Streamlit */
-header[data-testid="stHeader"] {
-    display: none !important;
-}
-[data-testid="stHeader"] {
-    display: none !important;
-}
-[data-testid="stDecoration"] {
-    display: none !important;
-}
-#MainMenu {
-    visibility: hidden;
-}
-footer {
-    visibility: hidden;
-}
-.stDeployButton {
-    display: none !important;
-}
+header[data-testid="stHeader"] { display: none !important; }
+[data-testid="stHeader"] { display: none !important; }
+[data-testid="stDecoration"] { display: none !important; }
+#MainMenu { visibility: hidden; }
+footer { visibility: hidden; }
+.stDeployButton { display: none !important; }
 
 /* Fondo oscuro general */
 .stApp {
     background-color: #0b0f19;
 }
 
-/* Espaciados para pantalla móvil */
 .block-container {
     padding-top: 0.8rem !important;
     padding-bottom: 2rem !important;
 }
 
-/* Encabezado elegante de Logo + Saldo */
+/* Encabezado Logo + Saldo */
 .custom-header {
     display: flex;
     justify-content: space-between;
@@ -205,23 +180,6 @@ footer {
     font-weight: bold;
     border: 1px solid #059669;
     text-shadow: 0px 0px 5px rgba(16, 185, 129, 0.3);
-}
-
-/* Slots de tragamonedas */
-.slot-machine-display {
-    background-color: #000000;
-    padding: 35px 20px;
-    border-radius: 16px;
-    border: 3px solid #f59e0b;
-    text-align: center;
-    margin-bottom: 20px;
-    box-shadow: 0px 0px 20px rgba(245, 158, 11, 0.25);
-}
-
-.slot-symbol {
-    font-size: 70px;
-    padding: 0 12px;
-    display: inline-block;
 }
 
 /* Grid de juegos */
@@ -301,17 +259,16 @@ h1, h2, h3, h4 {
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- CONTROL DE SESIÓN GENERAL ----------------
+# ---------------- FLUJO DE SESIÓN ACTIVA ----------------
 usuario_activo = st.session_state.usuario_conectado
 
 if usuario_activo:
-    # Recargar datos frescos del usuario desde la BD
     usuarios_db = cargar_base_datos()
     datos_usuario = usuarios_db.get(usuario_activo, {})
     saldo_actual = datos_usuario.get("saldo", 0.0)
     nombre_actual = datos_usuario.get("nombre", "Jugador")
     
-    # ---------------- BANER DE CABECERA (LOGO + SALDO) ----------------
+    # Render Cabecera
     if logo_base64:
         header_markup = f"""
         <div class="custom-header">
@@ -333,11 +290,9 @@ if usuario_activo:
         </div>
         """
     st.markdown(header_markup, unsafe_allow_html=True)
-    
-    # Mensaje de bienvenida sutil
-    st.markdown(f"<p style='color: #9ca3af; margin-top: -5px;'>Bienvenido de vuelta, <b>{nombre_actual}</b></p>", unsafe_allow_html=True)
+    st.markdown(f"<p style='color: #9ca3af; margin-top: -5px;'>Bienvenido, <b>{nombre_actual}</b></p>", unsafe_allow_html=True)
 
-    # ---------------- PESTAÑAS DE NAVEGACIÓN ----------------
+    # Tabs
     tab_slots, tab_ruleta, tab_cajero, tab_perfil, tab_admin = st.tabs([
         "🍒 Tragamonedas", 
         "🎡 Ruleta", 
@@ -346,66 +301,199 @@ if usuario_activo:
         "👑 Admin"
     ])
 
-    # ================= MÓDULO 1: TRAGAMONEDAS =================
+    # ================= MÓDULO 1: TRAGAMONEDAS REALES HTML5 =================
     with tab_slots:
-        st.markdown("## 🎰 JUEGO DE TRAGAMONEDAS")
+        st.markdown("## 🍒 TRAGAMONEDAS REAL INTERACTIVA")
         
-        SIMBOLOS_CASINO = ["🍒", "🍋", "🍉", "💎", "7️⃣", "👑"]
-        apuesta_usuario = st.number_input("Monto de tu apuesta ($):", min_value=10.0, max_value=2000.0, value=50.0, step=10.0)
+        apuesta_usuario = st.number_input("Monto de apuesta ($):", min_value=10.0, max_value=2000.0, value=50.0, step=10.0, key="bet_input")
         
-        carretes_placeholder = st.empty()
-        carretes_placeholder.markdown("""
-        <div class="slot-machine-display">
-            <span class="slot-symbol">❓</span>
-            <span class="slot-symbol">❓</span>
-            <span class="slot-symbol">❓</span>
-        </div>
-        """, unsafe_allow_html=True)
+        col_game, col_stats = st.columns([2, 1])
         
-        if st.button("¡GIRAR TRAGAMONEDAS!", type="primary", use_container_width=True):
-            if saldo_actual < apuesta_usuario:
-                st.error("❌ Saldo insuficiente. Ve al menú 'Cajero / Depósitos' para recargar fondos reales.")
-            else:
-                # Restar saldo de la BD
-                usuarios_db[usuario_activo]["saldo"] -= apuesta_usuario
-                guardar_base_datos(usuarios_db)
-                
-                for _ in range(6):
-                    giro_previo = [random.choice(SIMBOLOS_CASINO) for _ in range(3)]
-                    carretes_placeholder.markdown(f"""
-                    <div class="slot-machine-display">
-                        <span class="slot-symbol">{giro_previo[0]}</span>
-                        <span class="slot-symbol">{giro_previo[1]}</span>
-                        <span class="slot-symbol">{giro_previo[2]}</span>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    time.sleep(0.1)
-                    
-                resultado_final = [random.choice(SIMBOLOS_CASINO) for _ in range(3)]
-                carretes_placeholder.markdown(f"""
-                <div class="slot-machine-display">
-                    <span class="slot-symbol">{resultado_final[0]}</span>
-                    <span class="slot-symbol">{resultado_final[1]}</span>
-                    <span class="slot-symbol">{resultado_final[2]}</span>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                usuarios_db = cargar_base_datos()  # Recargar por seguridad
-                if resultado_final[0] == resultado_final[1] == resultado_final[2]:
-                    multiplicador = 12 if resultado_final[0] in ["7️⃣", "💎"] else 6
-                    premio = apuesta_usuario * multiplicador
-                    usuarios_db[usuario_activo]["saldo"] += premio
-                    st.success(f"🎉 ¡JACKPOT! Ganaste ${premio:,.2f} MXN (x{multiplicador})")
-                    st.balloons()
-                elif resultado_final[0] == resultado_final[1] or resultado_final[1] == resultado_final[2] or resultado_final[0] == resultado_final[2]:
-                    premio = apuesta_usuario * 1.5
-                    usuarios_db[usuario_activo]["saldo"] += premio
-                    st.warning(f"✨ ¡Doble coincidencia! Ganaste ${premio:,.2f} MXN")
+        # Símbolos lógicos para el juego en el backend de Python
+        SIMBOLOS_DICCIONARIO = {
+            "🍒": "Cherry", "🍋": "Lemon", "🍉": "Watermelon", "💎": "Diamond", "7️⃣": "Seven", "👑": "Crown"
+        }
+        
+        with col_game:
+            # Determinamos si el usuario acaba de disparar el giro
+            trigger_spin = False
+            target_symbols = ["❓", "❓", "❓"]
+            mensaje_premio = ""
+            tipo_alerta = ""
+            
+            if st.button("🎰 ¡GIRAR CARRETES!", type="primary", use_container_width=True):
+                if saldo_actual < apuesta_usuario:
+                    st.error("❌ Saldo insuficiente. Dirígete a la pestaña de Cajero para recargar.")
                 else:
-                    st.error(f"😢 Perdiste tu apuesta de ${apuesta_usuario:,.2f} MXN")
+                    # Deducción del saldo
+                    usuarios_db[usuario_activo]["saldo"] -= apuesta_usuario
+                    saldo_actual -= apuesta_usuario
+                    guardar_base_datos(usuarios_db)
+                    
+                    # Generamos el resultado de forma segura
+                    lista_simbolos = list(SIMBOLOS_DICCIONARIO.keys())
+                    resultado_final = [random.choice(lista_simbolos) for _ in range(3)]
+                    target_symbols = resultado_final
+                    trigger_spin = True
+                    
+                    # Lógica de cálculo de premios
+                    if resultado_final[0] == resultado_final[1] == resultado_final[2]:
+                        multiplicador = 12 if resultado_final[0] in ["7️⃣", "💎"] else 6
+                        premio = apuesta_usuario * multiplicador
+                        usuarios_db[usuario_activo]["saldo"] += premio
+                        saldo_actual += premio
+                        mensaje_premio = f"🎉 ¡JACKPOT! Combinación perfecta. Ganaste ${premio:,.2f} MXN (x{multiplicador})"
+                        tipo_alerta = "success"
+                    elif resultado_final[0] == resultado_final[1] or resultado_final[1] == resultado_final[2] or resultado_final[0] == resultado_final[2]:
+                        premio = apuesta_usuario * 1.5
+                        usuarios_db[usuario_activo]["saldo"] += premio
+                        saldo_actual += premio
+                        mensaje_premio = f"✨ ¡Excelente! 2 símbolos coinciden. Ganaste ${premio:,.2f} MXN"
+                        tipo_alerta = "warning"
+                    else:
+                        mensaje_premio = f"😢 Suerte para la próxima. Perdiste tu apuesta de ${apuesta_usuario:,.2f} MXN"
+                        tipo_alerta = "error"
+                    
+                    guardar_base_datos(usuarios_db)
+                    st.session_state.slot_resultado = {
+                        "symbols": target_symbols,
+                        "message": mensaje_premio,
+                        "type": tipo_alerta
+                    }
+            
+            # Recuperar el estado de juego para renderizar en el motor de HTML5
+            slot_state = st.session_state.slot_resultado or {
+                "symbols": ["❓", "❓", "❓"],
+                "message": "Presiona el botón de arriba para iniciar la acción.",
+                "type": "info"
+            }
+            
+            # --- MOTOR DE JUEGO HTML5 CANVAS / CSS INTEGRADO ---
+            html5_slots_code = f"""
+            <div style="background: radial-gradient(circle, #251b4f 0%, #0d0926 100%); border: 4px solid #f59e0b; border-radius: 20px; padding: 25px; text-align: center; box-shadow: 0 0 30px rgba(245, 158, 11, 0.4); font-family: sans-serif;">
                 
-                guardar_base_datos(usuarios_db)
-                st.rerun()
+                <!-- Pantalla del Tragamonedas -->
+                <div style="display: flex; justify-content: center; gap: 15px; background-color: #000; padding: 25px; border-radius: 12px; border: 2px solid #334155; overflow: hidden; height: 130px; position: relative;">
+                    
+                    <!-- Cristal de reflejo sobre los carretes -->
+                    <div style="position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.4) 100%); pointer-events: none; z-index: 5;"></div>
+                    
+                    <!-- Carrete 1 -->
+                    <div style="width: 80px; height: 80px; background-color: #1e293b; border-radius: 8px; border: 2px solid #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 55px; box-shadow: inset 0px 0px 15px rgba(0,0,0,0.8);" id="reel1">
+                        {slot_state['symbols'][0]}
+                    </div>
+                    <!-- Carrete 2 -->
+                    <div style="width: 80px; height: 80px; background-color: #1e293b; border-radius: 8px; border: 2px solid #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 55px; box-shadow: inset 0px 0px 15px rgba(0,0,0,0.8);" id="reel2">
+                        {slot_state['symbols'][1]}
+                    </div>
+                    <!-- Carrete 3 -->
+                    <div style="width: 80px; height: 80px; background-color: #1e293b; border-radius: 8px; border: 2px solid #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 55px; box-shadow: inset 0px 0px 15px rgba(0,0,0,0.8);" id="reel3">
+                        {slot_state['symbols'][2]}
+                    </div>
+                </div>
+
+                <div style="margin-top: 15px; color: #f8fafc; font-weight: bold; font-size: 16px; min-height: 25px;" id="status-label">
+                    {slot_state['message']}
+                </div>
+            </div>
+
+            <script>
+            // --- SINTETIZADOR DE SONIDOS (Web Audio API) ---
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+            function playClickSound() {{
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            }}
+
+            function playWinSound() {{
+                const notes = [261.63, 329.63, 392.00, 523.25]; // Acorde mayor
+                notes.forEach((freq, index) => {{
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + (index * 0.1));
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime + (index * 0.1));
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + (index * 0.1) + 0.3);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(audioCtx.currentTime + (index * 0.1));
+                    osc.stop(audioCtx.currentTime + (index * 0.1) + 0.3);
+                }});
+            }}
+
+            // --- ANIMACIÓN REALISTA DE CARRETES ---
+            const isSpinning = {str(trigger_spin).lower()};
+            if (isSpinning) {{
+                const r1 = document.getElementById('reel1');
+                const r2 = document.getElementById('reel2');
+                const r3 = document.getElementById('reel3');
+                const label = document.getElementById('status-label');
+                
+                label.innerHTML = "🎰 Girando carretes...";
+                
+                const symbolsPool = ["🍒", "🍋", "🍉", "💎", "7️⃣", "👑"];
+                let speed = 80;
+                let counter = 0;
+
+                const interval = setInterval(() => {{
+                    if (counter < 15) {{
+                        r1.innerHTML = symbolsPool[Math.floor(Math.random() * symbolsPool.length)];
+                        r2.innerHTML = symbolsPool[Math.floor(Math.random() * symbolsPool.length)];
+                        r3.innerHTML = symbolsPool[Math.floor(Math.random() * symbolsPool.length)];
+                        playClickSound();
+                    }} else if (counter === 15) {{
+                        r1.innerHTML = "{slot_state['symbols'][0]}";
+                        r1.style.borderColor = "#22c55e";
+                        playClickSound();
+                    }} else if (counter === 20) {{
+                        r2.innerHTML = "{slot_state['symbols'][1]}";
+                        r2.style.borderColor = "#22c55e";
+                        playClickSound();
+                    }} else if (counter === 25) {{
+                        r3.innerHTML = "{slot_state['symbols'][2]}";
+                        r3.style.borderColor = "#22c55e";
+                        playClickSound();
+                        
+                        clearInterval(interval);
+                        label.innerHTML = "{slot_state['message']}";
+                        
+                        if ("{slot_state['type']}" === "success" || "{slot_state['type']}" === "warning") {{
+                            playWinSound();
+                        }}
+                    }}
+                    counter++;
+                }}, speed);
+            }}
+            </script>
+            """
+            
+            st.components.v1.html(html5_slots_code, height=270)
+            
+            # Panel inferior de alertas
+            if slot_state['type'] == "success":
+                st.success(slot_state['message'])
+            elif slot_state['type'] == "warning":
+                st.warning(slot_state['message'])
+            elif slot_state['type'] == "error":
+                st.error(slot_state['message'])
+
+        with col_stats:
+            st.markdown("### Tabla de Pagos")
+            st.markdown("""
+            * **Línea de 3 (👑 o 7️⃣):** **12x** tu apuesta.
+            * **Línea de 3 (🍒, 🍋, 💎):** **6x** tu apuesta.
+            * **Cualquier doble coincidencia:** **1.5x** tu apuesta.
+            """)
 
     # ================= MÓDULO 2: RULETA EUROPEA =================
     with tab_ruleta:
@@ -555,7 +643,6 @@ if usuario_activo:
             
             monto_retiro = st.number_input("Monto a retirar (MXN):", min_value=100.0, max_value=max(100.0, saldo_actual), value=min(200.0, saldo_actual), step=50.0)
             
-            # Recordar métodos de pago automáticamente de la BD
             saved_banco = datos_usuario.get("banco", "")
             saved_clabe = datos_usuario.get("clabe", "")
             saved_titular = datos_usuario.get("titular", "")
@@ -574,17 +661,14 @@ if usuario_activo:
                 elif not banco_destino or not titular_cuenta:
                     st.error("Todos los campos bancarios son obligatorios para procesar el pago SPEI.")
                 else:
-                    # Descontamos el saldo en la BD
                     usuarios_db = cargar_base_datos()
                     usuarios_db[usuario_activo]["saldo"] -= monto_retiro
                     
-                    # Guardamos método de pago si el checkbox está activo
                     if guardar_metodo:
                         usuarios_db[usuario_activo]["banco"] = banco_destino
                         usuarios_db[usuario_activo]["clabe"] = clabe_retiro
                         usuarios_db[usuario_activo]["titular"] = titular_cuenta
                     
-                    # Generamos la orden de retiro
                     folio = random.randint(10000, 99999)
                     nuevo_retiro = {
                         "id": folio,
@@ -599,12 +683,10 @@ if usuario_activo:
                         "estado": "Pendiente de Procesamiento"
                     }
                     
-                    # Se almacena en la estructura de datos persistente
                     if "retiros_pendientes" not in st.session_state:
                         st.session_state.retiros_pendientes = []
                     st.session_state.retiros_pendientes.append(nuevo_retiro)
                     
-                    # Registramos en el historial individual del usuario
                     usuarios_db[usuario_activo]["historial"].append({
                         "fecha": nuevo_retiro["fecha"],
                         "tipo": f"Retiro (Folio #{folio})",
@@ -665,6 +747,7 @@ if usuario_activo:
         
         if st.button("🚪 Cerrar Sesión", use_container_width=True, type="secondary"):
             st.session_state.usuario_conectado = None
+            st.session_state.slot_resultado = None
             st.rerun()
 
     # ================= MÓDULO 5: PANEL DE OPERADOR (ADMIN) =================
@@ -706,7 +789,6 @@ if usuario_activo:
                         if st.button(f"Confirmar Envío de Pago #{r['id']}", key=f"btn_send_real_{r['id']}", use_container_width=True):
                             r["estado"] = "Transferido"
                             
-                            # Actualizamos el estatus en la BD del usuario correspondiente
                             usuarios_db = cargar_base_datos()
                             user_mail = r["usuario"]
                             if user_mail in usuarios_db:
@@ -746,9 +828,8 @@ if usuario_activo:
         elif password_ingresado:
             st.error("Contraseña de administrador incorrecta.")
 
-# ---------------- FLUJO DE REGISTRO / INICIO DE SESIÓN (PANTALLA DE ENTRADA) ----------------
+# ---------------- PANTALLA DE LOGUEO/REGISTRO GENERAL ----------------
 else:
-    # Mostramos cabecera estática
     if logo_base64:
         st.markdown(f"""
         <div style="text-align: center; margin-bottom: 20px;">
@@ -790,12 +871,11 @@ else:
             elif reg_correo in usuarios_db:
                 st.error("Este correo ya se encuentra registrado.")
             else:
-                # Insertar usuario de forma permanente en la base de datos
                 usuarios_db[reg_correo] = {
                     "nombre": reg_nombre,
                     "telefono": reg_telefono,
                     "contrasena": reg_pass,
-                    "saldo": 50.00,  # Bono inicial de cortesía de $50 reales
+                    "saldo": 50.00,
                     "clabe": "",
                     "banco": "",
                     "titular": "",

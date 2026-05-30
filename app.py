@@ -1,4 +1,3 @@
-```python
 import streamlit as st
 import random
 import time
@@ -257,5 +256,3 @@ with col_info1:
     st.info("🃏 Próximamente: Ruleta de la Fortuna y mesas en vivo.")
 with col_info2:
     st.info("🚀 Próximamente: Crash game (Multiplicador de cohete).")
-
-```
